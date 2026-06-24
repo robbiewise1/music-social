@@ -97,14 +97,41 @@ export default async function FeedPage() {
       )}
 
       {postsWithLikes.length === 0 ? (
-        <div className="py-24 text-center">
-          <p className="text-zinc-400 text-sm">No posts yet.</p>
-          <Link
-            href="/compose"
-            className="mt-3 inline-block text-sm text-zinc-900 underline underline-offset-2"
-          >
-            Be the first to post
-          </Link>
+        <div className="py-20 text-center space-y-4">
+          {isEmptyFeed ? (
+            <>
+              <p className="text-2xl">👋</p>
+              <p className="text-zinc-900 font-semibold">Welcome to Music Club</p>
+              <p className="text-sm text-zinc-500 max-w-xs mx-auto">
+                Follow some friends to see what they&apos;re listening to — or be
+                the first to post a song.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                <Link
+                  href="/search"
+                  className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+                >
+                  Find people to follow
+                </Link>
+                <Link
+                  href="/compose"
+                  className="rounded-full border border-zinc-200 px-5 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 transition-colors"
+                >
+                  Post a song
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-zinc-400 text-sm">No posts yet.</p>
+              <Link
+                href="/compose"
+                className="mt-1 inline-block text-sm text-zinc-900 underline underline-offset-2"
+              >
+                Be the first to post
+              </Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

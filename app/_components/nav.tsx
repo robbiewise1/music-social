@@ -22,13 +22,13 @@ export async function Nav() {
             <>
               <Link
                 href="/search"
-                className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                className="hidden sm:inline text-zinc-500 hover:text-zinc-900 transition-colors"
               >
                 Find people
               </Link>
               <Link
                 href="/compose"
-                className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                className="hidden sm:inline text-zinc-500 hover:text-zinc-900 transition-colors"
               >
                 + Post
               </Link>
