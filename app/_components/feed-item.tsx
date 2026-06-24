@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export type FeedPost = {
   id: string;
@@ -34,13 +35,16 @@ export function FeedItem({ post }: { post: FeedPost }) {
   return (
     <article className="rounded-xl border border-zinc-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+        <Link
+          href={`/profile/${profile?.username}`}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
           <div className="h-7 w-7 rounded-full bg-zinc-200 shrink-0" />
           <span className="text-sm font-medium text-zinc-900">
             {profile?.display_name ?? profile?.username ?? "Unknown"}
           </span>
           <span className="text-xs text-zinc-400">@{profile?.username}</span>
-        </div>
+        </Link>
         <span className="text-xs text-zinc-400">{timeAgo(post.created_at)}</span>
       </div>
 
