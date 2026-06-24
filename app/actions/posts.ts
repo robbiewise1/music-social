@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import type { SongResult } from "@/app/api/spotify/search/route";
 
@@ -15,7 +16,9 @@ export async function createPost(
 
   if (!user) return { error: "Not authenticated." };
 
-  const { data: songRow, error: songError } = await supabase
+  const admin = createAdminClient();
+
+  const { data: songRow, error: songError } = await admin
     .from("songs")
     .upsert(
       {
@@ -34,7 +37,7 @@ export async function createPost(
 
   if (songError || !songRow) return { error: "Failed to save song." };
 
-  const { error: postError } = await supabase.from("posts").insert({
+  const { error: postError } = await admin.from("posts").insert({
     user_id: user.id,
     song_id: songRow.id,
     caption: caption.trim() || null,
