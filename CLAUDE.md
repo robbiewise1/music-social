@@ -119,12 +119,12 @@ body text, created_at timestamptz
 - [x] **M2 — Auth**: Supabase email/password, sign up creates `profiles` row, `proxy.ts` protects `/feed` `/compose` `/search`, nav bar with auth state. Tested and working — signup lands on `/feed`.
 - [x] **M3 — Database schema**: All tables in Supabase SQL editor, RLS policies, seed prompts.
 - [x] **M4 — Music search**: iTunes Search API at `/api/spotify/search` (switched from Spotify — requires Premium), `SongSearchInput` component with 350ms debounce, `SongCard` component. Tested and working.
-- [ ] **M5 — Create post**: Composer page, song search + caption + submit, upserts song, creates post
-- [ ] **M6 — Feed**: Fetch posts from followed users + self, `FeedItem` component, click song → Spotify
-- [ ] **M7 — Follow system**: `/search` to find users, follow/unfollow, profile page with post grid
-- [ ] **M8 — Daily prompts**: `/prompt/[date]` page, prompt banner on feed, seed prompts in DB
-- [ ] **M9 — Likes**: Like button on feed items, optimistic UI update
-- [ ] **M10 — Polish**: Loading skeletons, empty states, mobile responsive, onboarding
+- [x] **M5 — Create post**: Composer page, song search + caption + submit, upserts song, creates post
+- [x] **M6 — Feed**: Fetch posts from followed users + self, `FeedItem` component, click song → Apple Music
+- [x] **M7 — Follow system**: `/search` to find users, follow/unfollow, profile page with post grid
+- [x] **M8 — Daily prompts**: `/prompt/[date]` page, prompt banner on feed, seed prompts in DB
+- [x] **M9 — Likes**: Like button on feed items, optimistic UI update
+- [x] **M10 — Polish**: Loading skeletons, empty states, mobile responsive, onboarding
 
 ## MVP definition of done
 
