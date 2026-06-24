@@ -48,19 +48,30 @@ SPOTIFY_CLIENT_SECRET           # same page
 ```
 app/
 ├── page.tsx                  ← Landing page ✓
-├── login/page.tsx            ← Stub ✓
-├── signup/page.tsx           ← Stub ✓
-├── feed/page.tsx             ← Stub ✓
-├── compose/page.tsx          ← Stub ✓
-├── search/page.tsx           ← Stub ✓
-├── profile/[username]/       ← Stub ✓
-├── prompt/[date]/            ← Stub ✓
-└── api/spotify/search/       ← Stub ✓
+├── layout.tsx                ← Root layout with <Nav /> ✓
+├── _components/nav.tsx       ← Auth-aware nav bar (server component) ✓
+├── actions/auth.ts           ← signup / login / logout server actions ✓
+├── login/page.tsx            ← Login form ✓
+├── signup/page.tsx           ← Signup form ✓
+├── feed/page.tsx             ← Stub
+├── compose/page.tsx          ← Stub
+├── search/page.tsx           ← Stub
+├── profile/[username]/       ← Stub
+├── prompt/[date]/            ← Stub
+└── api/spotify/search/       ← Stub
 
 lib/supabase/
 ├── client.ts                 ← Browser Supabase client ✓
 └── server.ts                 ← Server Supabase client ✓
+
+proxy.ts                      ← Route protection (Next.js 16) ✓
 ```
+
+## Supabase project
+
+- Project ID: `juqspjspnyxqlcfkbalh`
+- Profiles table: created and RLS enabled ✓
+- Email confirmation: disabled for development (re-enable before launch)
 
 ## Database schema (implement in Milestone 3)
 
@@ -105,8 +116,8 @@ body text, created_at timestamptz
 ## Milestone progress
 
 - [x] **M1 — Project setup**: Next.js scaffold, Supabase packages installed, route stubs, folder structure, `.env.local` template, clean build
-- [ ] **M2 — Auth**: Supabase email/password, sign up creates `profiles` row, `proxy.ts` protects `/feed` `/compose` `/search`, nav bar with auth state
-- [ ] **M3 — Database schema**: All tables in Supabase, RLS policies, seed 60+ prompts
+- [x] **M2 — Auth**: Supabase email/password, sign up creates `profiles` row, `proxy.ts` protects `/feed` `/compose` `/search`, nav bar with auth state. Tested and working — signup lands on `/feed`.
+- [ ] **M3 — Database schema**: All tables in Supabase SQL editor, RLS policies, seed prompts. Next up.
 - [ ] **M4 — Spotify search**: `/api/spotify/search` route with token caching, `SongSearchInput` component, `SongCard` component
 - [ ] **M5 — Create post**: Composer page, song search + caption + submit, upserts song, creates post
 - [ ] **M6 — Feed**: Fetch posts from followed users + self, `FeedItem` component, click song → Spotify
