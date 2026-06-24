@@ -20,6 +20,14 @@ export default async function FeedPage() {
   const isEmptyFeed = followingIds.length === 0;
 
   const admin = createAdminClient();
+
+  const today = new Date().toISOString().split("T")[0];
+  const { data: todayPrompt } = await admin
+    .from("prompts")
+    .select("id, title, active_date")
+    .eq("active_date", today)
+    .maybeSingle();
+
   const baseQuery = admin
     .from("posts")
     .select(
@@ -38,8 +46,49 @@ export default async function FeedPage() {
 
   const posts = (rawPosts ?? []) as unknown as FeedPost[];
 
+  // Fetch like counts and current user's likes in parallel
+  const postIds = posts.map((p) => p.id);
+  const [{ data: allLikes }, { data: myLikes }] =
+    postIds.length > 0
+      ? await Promise.all([
+          admin.from("likes").select("post_id").in("post_id", postIds),
+          admin
+            .from("likes")
+            .select("post_id")
+            .eq("user_id", user.id)
+            .in("post_id", postIds),
+        ])
+      : [{ data: [] }, { data: [] }];
+
+  const likeCountMap = new Map<string, number>();
+  for (const l of allLikes ?? []) {
+    likeCountMap.set(l.post_id, (likeCountMap.get(l.post_id) ?? 0) + 1);
+  }
+  const likedSet = new Set((myLikes ?? []).map((l) => l.post_id));
+
+  const postsWithLikes = posts.map((p) => ({
+    ...p,
+    likeCount: likeCountMap.get(p.id) ?? 0,
+    isLiked: likedSet.has(p.id),
+  }));
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
+      {todayPrompt && (
+        <div className="mb-6 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs text-zinc-400 mb-0.5">Today&apos;s prompt</p>
+            <p className="text-sm font-semibold text-zinc-900">{todayPrompt.title}</p>
+          </div>
+          <Link
+            href={`/prompt/${todayPrompt.active_date}`}
+            className="shrink-0 rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 transition-colors"
+          >
+            See responses
+          </Link>
+        </div>
+      )}
+
       {isEmptyFeed && posts.length > 0 && (
         <p className="text-center text-xs text-zinc-400 mb-6">
           You&apos;re not following anyone yet — here&apos;s what everyone is
@@ -47,7 +96,7 @@ export default async function FeedPage() {
         </p>
       )}
 
-      {posts.length === 0 ? (
+      {postsWithLikes.length === 0 ? (
         <div className="py-24 text-center">
           <p className="text-zinc-400 text-sm">No posts yet.</p>
           <Link
@@ -59,7 +108,7 @@ export default async function FeedPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {posts.map((post) => (
+          {postsWithLikes.map((post) => (
             <FeedItem key={post.id} post={post} />
           ))}
         </div>

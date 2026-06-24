@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LikeButton } from "./like-button";
 
 export type FeedPost = {
   id: string;
@@ -17,6 +18,8 @@ export type FeedPost = {
     album_art_url: string | null;
     spotify_url: string;
   } | null;
+  likeCount?: number;
+  isLiked?: boolean;
 };
 
 function timeAgo(dateStr: string): string {
@@ -95,6 +98,14 @@ export function FeedItem({ post }: { post: FeedPost }) {
       {post.caption && (
         <p className="mt-3 text-sm text-zinc-700">{post.caption}</p>
       )}
+
+      <div className="mt-3 pt-3 border-t border-zinc-50">
+        <LikeButton
+          postId={post.id}
+          initialLiked={post.isLiked ?? false}
+          initialCount={post.likeCount ?? 0}
+        />
+      </div>
     </article>
   );
 }

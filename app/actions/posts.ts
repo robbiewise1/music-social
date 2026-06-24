@@ -7,7 +7,8 @@ import type { SongResult } from "@/app/api/spotify/search/route";
 
 export async function createPost(
   song: SongResult,
-  caption: string
+  caption: string,
+  promptId?: string | null
 ): Promise<{ error: string } | never> {
   const supabase = await createClient();
   const {
@@ -41,6 +42,7 @@ export async function createPost(
     user_id: user.id,
     song_id: songRow.id,
     caption: caption.trim() || null,
+    prompt_id: promptId ?? null,
   });
 
   if (postError) return { error: "Failed to create post." };
