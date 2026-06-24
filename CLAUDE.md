@@ -117,7 +117,7 @@ body text, created_at timestamptz
 
 - [x] **M1 — Project setup**: Next.js scaffold, Supabase packages installed, route stubs, folder structure, `.env.local` template, clean build
 - [x] **M2 — Auth**: Supabase email/password, sign up creates `profiles` row, `proxy.ts` protects `/feed` `/compose` `/search`, nav bar with auth state. Tested and working — signup lands on `/feed`.
-- [ ] **M3 — Database schema**: All tables in Supabase SQL editor, RLS policies, seed prompts. Next up.
+- [x] **M3 — Database schema**: All tables in Supabase SQL editor, RLS policies, seed prompts.
 - [ ] **M4 — Spotify search**: `/api/spotify/search` route with token caching, `SongSearchInput` component, `SongCard` component
 - [ ] **M5 — Create post**: Composer page, song search + caption + submit, upserts song, creates post
 - [ ] **M6 — Feed**: Fetch posts from followed users + self, `FeedItem` component, click song → Spotify
