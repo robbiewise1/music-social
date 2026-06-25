@@ -5,7 +5,7 @@ import { SongSearchInput } from "@/app/_components/song-search-input";
 import { type SongResult } from "@/app/api/spotify/search/route";
 import { createPost } from "@/app/actions/posts";
 
-type Prompt = { id: string; title: string; description: string | null } | null;
+type Prompt = { id: string; title: string; description: string | null; prompt_type: string } | null;
 
 export function ComposeForm({ todayPrompt }: { todayPrompt: Prompt }) {
   const [selectedSong, setSelectedSong] = useState<SongResult | null>(null);
@@ -29,7 +29,9 @@ export function ComposeForm({ todayPrompt }: { todayPrompt: Prompt }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {todayPrompt && (
         <div className="rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3">
-          <p className="text-xs text-zinc-400 mb-0.5">Today&apos;s prompt</p>
+          <p className="text-xs text-zinc-400 mb-0.5">
+            {todayPrompt.prompt_type === "song_of_the_day" ? "Song of the Day" : "Today's prompt"}
+          </p>
           <p className="text-sm font-medium text-zinc-900">{todayPrompt.title}</p>
           {todayPrompt.description && (
             <p className="text-xs text-zinc-500 mt-0.5">{todayPrompt.description}</p>

@@ -38,12 +38,15 @@ export async function createPost(
 
   if (songError || !songRow) return { error: "Failed to save song." };
 
-  const { error: postError } = await admin.from("posts").insert({
-    user_id: user.id,
-    song_id: songRow.id,
-    caption: caption.trim() || null,
-    prompt_id: promptId ?? null,
-  });
+  const { error: postError } = await admin.from("posts").upsert(
+    {
+      user_id: user.id,
+      song_id: songRow.id,
+      caption: caption.trim() || null,
+      prompt_id: promptId ?? null,
+    },
+    { onConflict: "user_id,prompt_id", ignoreDuplicates: false }
+  );
 
   if (postError) return { error: "Failed to create post." };
 
