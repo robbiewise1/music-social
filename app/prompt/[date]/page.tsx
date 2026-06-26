@@ -96,6 +96,9 @@ export default async function PromptPage({
   const userPostedSotd = user ? sotdPosts.some((p) => p.user_id === user.id) : false;
   const userPostedFun = user ? funPosts.some((p) => p.user_id === user.id) : false;
 
+  const today = new Date().toISOString().split("T")[0];
+  const isToday = date === today;
+
   const formatted = new Date(date + "T00:00:00").toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -104,7 +107,12 @@ export default async function PromptPage({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <p className="text-xs text-zinc-400 mb-8">{formatted}</p>
+      <div className="flex items-center gap-3 mb-8">
+        <Link href="/feed" className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">
+          ← Home
+        </Link>
+        <p className="text-xs text-zinc-400">{formatted}</p>
+      </div>
 
       {sotd && (
         <section className="mb-12">
@@ -112,12 +120,14 @@ export default async function PromptPage({
           {sotd.description && (
             <p className="text-sm text-zinc-500 mb-6">{sotd.description}</p>
           )}
-          <Link
-            href={`/compose?prompt_id=${sotd.id}`}
-            className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-          >
-            {userPostedSotd ? "Change your song" : "+ Post your song"}
-          </Link>
+          {isToday && (
+            <Link
+              href={`/compose?prompt_id=${sotd.id}`}
+              className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+            >
+              {userPostedSotd ? "Change your song" : "+ Post your song"}
+            </Link>
+          )}
           {sotdWithLikes.length === 0 ? (
             <p className="py-12 text-center text-sm text-zinc-400">
               No songs yet — be the first!
@@ -140,12 +150,14 @@ export default async function PromptPage({
             {funPrompt.description && (
               <p className="text-sm text-zinc-500 mb-6">{funPrompt.description}</p>
             )}
-            <Link
-              href={`/compose?prompt_id=${funPrompt.id}`}
-              className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-            >
-              {userPostedFun ? "Change your response" : "+ Post your response"}
-            </Link>
+            {isToday && (
+              <Link
+                href={`/compose?prompt_id=${funPrompt.id}`}
+                className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+              >
+                {userPostedFun ? "Change your response" : "+ Post your response"}
+              </Link>
+            )}
             {funWithLikes.length === 0 ? (
               <p className="py-12 text-center text-sm text-zinc-400">
                 No responses yet — be the first!

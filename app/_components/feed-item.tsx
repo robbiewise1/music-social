@@ -18,18 +18,20 @@ export type FeedPost = {
     album_art_url: string | null;
     spotify_url: string;
   } | null;
+  prompt?: {
+    title: string;
+    active_date: string;
+  } | null;
   likeCount?: number;
   isLiked?: boolean;
 };
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export function FeedItem({ post }: { post: FeedPost }) {
@@ -48,8 +50,18 @@ export function FeedItem({ post }: { post: FeedPost }) {
           </span>
           <span className="text-xs text-zinc-400">@{profile?.username}</span>
         </Link>
-        <span className="text-xs text-zinc-400">{timeAgo(post.created_at)}</span>
+        <span className="text-xs text-zinc-400">{formatDate(post.created_at)}</span>
       </div>
+
+      {post.prompt && (
+        <Link
+          href={`/prompt/${post.prompt.active_date}`}
+          className="inline-flex items-center gap-1 mb-3 text-xs text-zinc-500 hover:text-zinc-800 transition-colors"
+        >
+          <span className="text-zinc-300">▶</span>
+          {post.prompt.title}
+        </Link>
+      )}
 
       {song && (
         <a

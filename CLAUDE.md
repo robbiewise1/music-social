@@ -125,6 +125,8 @@ body text, created_at timestamptz
 - [x] **M8 — Daily prompts**: `/prompt/[date]` page, prompt banner on feed, seed prompts in DB
 - [x] **M9 — Likes**: Like button on feed items, optimistic UI update
 - [x] **M10 — Polish**: Loading skeletons, empty states, mobile responsive, onboarding
+- [x] **M11 — Dual prompt system**: `prompt_type` column (`song_of_the_day` | `daily_fun`), unique constraint per `(active_date, prompt_type)`, one-post-per-user-per-prompt enforced at DB level
+- [x] **M12 — Home screen redesign**: `/feed` replaced with two-card prompt hub (Song of the Day + Daily Prompt), live post counts per card. Feed items now show prompt label + formatted date. Prompt page read-only for past dates (post button hidden when `date !== today`), "← Home" back link added.
 
 ## MVP definition of done
 
