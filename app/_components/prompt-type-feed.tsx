@@ -100,14 +100,9 @@ export async function PromptTypeFeed({
     fetchDaySection(yesterday, promptType, user?.id),
   ]);
 
-  const actionLabel =
-    promptType === "song_of_the_day" ? "Post your song" : "Post your response";
-  const changeLabel =
-    promptType === "song_of_the_day" ? "Change your song" : "Change your response";
-  const emptyLabel =
-    promptType === "song_of_the_day"
-      ? "No songs yet — be the first!"
-      : "No responses yet — be the first!";
+  const actionLabel = "Post your song";
+  const changeLabel = "Change your song";
+  const emptyLabel = "No songs yet — be the first!";
 
   function DaySection({
     dateStr,
