@@ -151,8 +151,8 @@ export async function PromptTypeFeed({
 
   const otherType = promptType === "song_of_the_day" ? "daily_fun" : "song_of_the_day";
   const otherHref = promptType === "song_of_the_day" ? "/prompt/daily-fun" : "/prompt/song-of-the-day";
-  const otherLabel = promptType === "song_of_the_day" ? "Daily Prompt" : "Song of the Day";
-  const currentLabel = promptType === "song_of_the_day" ? "Song of the Day" : "Daily Prompt";
+  const otherLabel = promptType === "song_of_the_day" ? "Prompt of the Day" : "Song of the Day";
+  const currentLabel = promptType === "song_of_the_day" ? "Song of the Day" : "Prompt of the Day";
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">

@@ -92,7 +92,7 @@ export default async function FeedPage() {
         >
           <div>
             <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-2">
-              Daily Prompt
+              Prompt of the Day
             </p>
             <p className="text-lg font-semibold text-zinc-900 leading-snug">
               {funPrompt?.title ?? "Today's prompt"}
