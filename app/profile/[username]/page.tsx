@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { FeedItem, type FeedPost } from "@/app/_components/feed-item";
-import { FollowButton } from "@/app/_components/follow-button";
 
 export default async function ProfilePage({
   params,
@@ -25,42 +24,19 @@ export default async function ProfilePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [followersRes, followingRes, isFollowingRes, postsRes] =
-    await Promise.all([
-      admin
-        .from("follows")
-        .select("*", { count: "exact", head: true })
-        .eq("following_id", profile.id),
-      admin
-        .from("follows")
-        .select("*", { count: "exact", head: true })
-        .eq("follower_id", profile.id),
-      user
-        ? admin
-            .from("follows")
-            .select("following_id")
-            .eq("follower_id", user.id)
-            .eq("following_id", profile.id)
-            .maybeSingle()
-        : Promise.resolve({ data: null }),
-      admin
-        .from("posts")
-        .select(
-          `id, caption, created_at,
-           profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url ),
-           songs ( title, artist, album, album_art_url, spotify_url ),
-           prompt:prompts ( title, active_date )`
-        )
-        .eq("user_id", profile.id)
-        .order("created_at", { ascending: false })
-        .limit(50),
-    ]);
+  const { data: rawPosts } = await admin
+    .from("posts")
+    .select(
+      `id, caption, created_at,
+       profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url ),
+       songs ( title, artist, album, album_art_url, spotify_url ),
+       prompt:prompts ( title, active_date )`
+    )
+    .eq("user_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(50);
 
-  const followerCount = followersRes.count ?? 0;
-  const followingCount = followingRes.count ?? 0;
-  const isFollowing = !!isFollowingRes.data;
-  const posts = (postsRes.data ?? []) as unknown as FeedPost[];
-  const isOwnProfile = user?.id === profile.id;
+  const posts = (rawPosts ?? []) as unknown as FeedPost[];
 
   // Fetch like data
   const postIds = posts.map((p) => p.id);
@@ -100,21 +76,8 @@ export default async function ProfilePage({
               {profile.display_name}
             </h1>
             <p className="text-sm text-zinc-400">@{profile.username}</p>
-            <div className="mt-1.5 flex gap-4 text-xs text-zinc-500">
-              <span>
-                <strong className="text-zinc-900">{followerCount}</strong>{" "}
-                followers
-              </span>
-              <span>
-                <strong className="text-zinc-900">{followingCount}</strong>{" "}
-                following
-              </span>
-            </div>
           </div>
         </div>
-        {user && !isOwnProfile && (
-          <FollowButton userId={profile.id} initialFollowing={isFollowing} />
-        )}
       </div>
 
       {postsWithLikes.length === 0 ? (

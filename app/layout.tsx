@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Music Club",
   description: "Share songs with friends. Respond to daily music prompts.",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

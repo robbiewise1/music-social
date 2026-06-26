@@ -20,13 +20,7 @@ export async function Nav() {
         <div className="flex items-center gap-4 text-sm">
           {user ? (
             <>
-              <Link
-                href="/search"
-                className="hidden sm:inline text-zinc-500 hover:text-zinc-900 transition-colors"
-              >
-                Find people
-              </Link>
-              <Link
+<Link
                 href="/compose"
                 className="hidden sm:inline text-zinc-500 hover:text-zinc-900 transition-colors"
               >
