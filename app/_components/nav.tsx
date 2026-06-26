@@ -20,12 +20,6 @@ export async function Nav() {
         <div className="flex items-center gap-4 text-sm">
           {user ? (
             <>
-<Link
-                href="/compose"
-                className="hidden sm:inline text-zinc-500 hover:text-zinc-900 transition-colors"
-              >
-                + Post
-              </Link>
               <form action={logout}>
                 <button
                   type="submit"
