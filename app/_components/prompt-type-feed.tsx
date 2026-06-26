@@ -10,14 +10,11 @@ const POST_SELECT = `id, caption, created_at, user_id,
 type PostWithUser = FeedPost & { user_id: string };
 type PromptType = "song_of_the_day" | "daily_fun";
 
-function getDateStrings() {
-  const now = new Date();
-  const today = now.toISOString().split("T")[0];
-  const y = new Date(now);
-  y.setDate(y.getDate() - 1);
-  const yesterday = y.toISOString().split("T")[0];
-  return { today, yesterday };
-}
+type DaySectionData = {
+  prompt: { id: string; title: string; description: string | null } | null;
+  posts: (PostWithUser & { likeCount: number; isLiked: boolean })[];
+  userPosted: boolean;
+};
 
 function formatDate(dateStr: string) {
   return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
@@ -27,11 +24,69 @@ function formatDate(dateStr: string) {
   });
 }
 
+function DaySection({
+  dateStr,
+  label,
+  data,
+  isToday,
+  user,
+}: {
+  dateStr: string;
+  label: string;
+  data: DaySectionData;
+  isToday: boolean;
+  user: { id: string } | null;
+}) {
+  if (!data.prompt) return null;
+
+  return (
+    <section className="mb-14 w-full">
+      <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">
+        {label} · {formatDate(dateStr)}
+      </p>
+      <h2 className="text-2xl font-bold text-zinc-900 mb-1">
+        {data.prompt.title}
+      </h2>
+      {data.prompt.description && (
+        <p className="text-sm text-zinc-500 mb-6">{data.prompt.description}</p>
+      )}
+      {isToday && user && (
+        <Link
+          href={`/compose?prompt_id=${data.prompt.id}`}
+          className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+        >
+          {data.userPosted ? "Change your song" : "+ Post your song"}
+        </Link>
+      )}
+      {data.posts.length === 0 ? (
+        <p className="py-12 text-center text-sm text-zinc-400">
+          No songs yet — be the first!
+        </p>
+      ) : (
+        <div className="w-full space-y-4">
+          {data.posts.map((post) => (
+            <FeedItem key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function getDateStrings() {
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const y = new Date(now);
+  y.setDate(y.getDate() - 1);
+  const yesterday = y.toISOString().split("T")[0];
+  return { today, yesterday };
+}
+
 async function fetchDaySection(
   date: string,
   promptType: PromptType,
   userId: string | undefined
-) {
+): Promise<DaySectionData> {
   const admin = createAdminClient();
 
   const { data: prompt } = await admin
@@ -83,73 +138,17 @@ async function fetchDaySection(
   return { prompt, posts: postsWithLikes, userPosted };
 }
 
-export async function PromptTypeFeed({
-  promptType,
-}: {
-  promptType: PromptType;
-}) {
+export async function PromptTypeFeed({ promptType }: { promptType: PromptType }) {
   const { today, yesterday } = getDateStrings();
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const [todayData, yesterdayData] = await Promise.all([
     fetchDaySection(today, promptType, user?.id),
     fetchDaySection(yesterday, promptType, user?.id),
   ]);
 
-  const actionLabel = "Post your song";
-  const changeLabel = "Change your song";
-  const emptyLabel = "No songs yet — be the first!";
-
-  function DaySection({
-    dateStr,
-    label,
-    data,
-    isToday,
-  }: {
-    dateStr: string;
-    label: string;
-    data: Awaited<ReturnType<typeof fetchDaySection>>;
-    isToday: boolean;
-  }) {
-    if (!data.prompt) return null;
-
-    return (
-      <section className="mb-14">
-        <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">
-          {label} · {formatDate(dateStr)}
-        </p>
-        <h2 className="text-2xl font-bold text-zinc-900 mb-1">
-          {data.prompt.title}
-        </h2>
-        {data.prompt.description && (
-          <p className="text-sm text-zinc-500 mb-6">{data.prompt.description}</p>
-        )}
-        {isToday && user && (
-          <Link
-            href={`/compose?prompt_id=${data.prompt.id}`}
-            className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-          >
-            {data.userPosted ? changeLabel : `+ ${actionLabel}`}
-          </Link>
-        )}
-        {data.posts.length === 0 ? (
-          <p className="py-12 text-center text-sm text-zinc-400">{emptyLabel}</p>
-        ) : (
-          <div className="space-y-4">
-            {data.posts.map((post) => (
-              <FeedItem key={post.id} post={post} />
-            ))}
-          </div>
-        )}
-      </section>
-    );
-  }
-
-  const otherType = promptType === "song_of_the_day" ? "daily_fun" : "song_of_the_day";
   const otherHref = promptType === "song_of_the_day" ? "/prompt/daily-fun" : "/prompt/song-of-the-day";
   const otherLabel = promptType === "song_of_the_day" ? "Prompt of the Day" : "Song of the Day";
   const currentLabel = promptType === "song_of_the_day" ? "Song of the Day" : "Prompt of the Day";
@@ -157,10 +156,7 @@ export async function PromptTypeFeed({
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <div className="flex items-center gap-3 mb-8">
-        <Link
-          href="/feed"
-          className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors"
-        >
+        <Link href="/feed" className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">
           ← Home
         </Link>
       </div>
@@ -177,22 +173,12 @@ export async function PromptTypeFeed({
         </Link>
       </div>
 
-      <DaySection
-        dateStr={today}
-        label="Today"
-        data={todayData}
-        isToday={true}
-      />
+      <DaySection dateStr={today} label="Today" data={todayData} isToday={true} user={user} />
 
       {yesterdayData.prompt && (
         <>
           <hr className="border-zinc-100 mb-14" />
-          <DaySection
-            dateStr={yesterday}
-            label="Yesterday"
-            data={yesterdayData}
-            isToday={false}
-          />
+          <DaySection dateStr={yesterday} label="Yesterday" data={yesterdayData} isToday={false} user={user} />
         </>
       )}
     </main>
