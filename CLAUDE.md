@@ -71,7 +71,8 @@ proxy.ts                      ← Route protection (Next.js 16) ✓
 
 - Project ID: `juqspjspnyxqlcfkbalh`
 - Profiles table: created and RLS enabled ✓
-- Email confirmation: disabled for development (re-enable before launch)
+- Email confirmation: disabled permanently (no custom SMTP; password-only signup)
+- `auth.users` is private — only accessible via Supabase dashboard or service role key
 
 ## Database schema (implement in Milestone 3)
 
@@ -128,10 +129,18 @@ body text, created_at timestamptz
 - [x] **M11 — Dual prompt system**: `prompt_type` column (`song_of_the_day` | `daily_fun`), unique constraint per `(active_date, prompt_type)`, one-post-per-user-per-prompt enforced at DB level
 - [x] **M12 — Home screen redesign**: `/feed` replaced with two-card prompt hub (Song of the Day + Daily Prompt), live post counts per card. Feed items now show prompt label + formatted date. Prompt page read-only for past dates (post button hidden when `date !== today`), "← Home" back link added.
 - [x] **M13 — Separate prompt type pages**: Each card now links to its own page (`/prompt/song-of-the-day`, `/prompt/daily-fun`). Each page shows today's + yesterday's prompt and posts. Tab switcher at the top lets you jump between the two. Fixed `createPost` upsert bug (partial unique index incompatible with Supabase `onConflict` column syntax — replaced with explicit select + insert/update). After posting, redirects back to the prompt page instead of home.
+- [x] **M14 — Deployment**: Live at `https://music-social-eta.vercel.app`. GitHub repo public (robbiewise1/music-social). All env vars set cleanly in Vercel (BOM issue resolved by re-adding via CLI). `robots.txt` + `noindex` metadata — app is link-only, not search-indexed. Email confirmation disabled; password-only signup. Supabase redirect URLs configured for production domain.
+- [x] **M15 — Post-launch polish**: Post timestamps in Eastern Time. Song search fetches 25 results from iTunes and re-ranks by title match so the typed song appears first. Tap like count to see who liked a post (works on mobile — inline dismiss on outside tap). Canada Day prompt seeded for July 1st. Git commits now use GitHub no-reply email instead of university email.
+
+## Production notes
+
+- Env vars must be set via CLI (`vercel env add`) not web UI — web UI paste can introduce BOM characters (U+FEFF) that break auth headers
+- All three Supabase env vars are Sensitive in Vercel; `vercel env pull` returns them as empty — this is expected
+- Supabase free tier pauses after 7 days of inactivity (auto-resumes on next request, ~30s cold start)
 
 ## MVP definition of done
 
-You and 5 friends can sign up, follow each other, respond to today's prompt, see each other's posts, and click through to Spotify. Comments, notifications, Apple Music — all deferred.
+You and 5 friends can sign up, respond to today's prompt, see each other's posts, and click through to Apple Music. Comments, notifications — deferred.
 
 ## Deferred features
 
