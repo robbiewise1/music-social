@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FeedItem, type FeedPost } from "@/app/_components/feed-item";
+import { type FeedPost } from "@/app/_components/feed-item";
+import { SortableFeedList } from "@/app/_components/sortable-feed-list";
 
 const POST_SELECT = `id, caption, created_at, user_id,
   profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url ),
@@ -140,11 +141,7 @@ export default async function PromptPage({
               No songs yet — be the first!
             </p>
           ) : (
-            <div className="space-y-4">
-              {sotdWithLikes.map((post) => (
-                <FeedItem key={post.id} post={post} />
-              ))}
-            </div>
+            <SortableFeedList posts={sotdWithLikes} />
           )}
         </section>
       )}
@@ -170,11 +167,7 @@ export default async function PromptPage({
                 No responses yet — be the first!
               </p>
             ) : (
-              <div className="space-y-4">
-                {funWithLikes.map((post) => (
-                  <FeedItem key={post.id} post={post} />
-                ))}
-              </div>
+              <SortableFeedList posts={funWithLikes} />
             )}
           </section>
         </>

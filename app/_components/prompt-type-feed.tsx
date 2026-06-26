@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
-import { FeedItem, type FeedPost } from "@/app/_components/feed-item";
+import { type FeedPost } from "@/app/_components/feed-item";
+import { SortableFeedList } from "@/app/_components/sortable-feed-list";
 
 const POST_SELECT = `id, caption, created_at, user_id,
   profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url ),
@@ -63,11 +64,7 @@ function DaySection({
           No songs yet — be the first!
         </p>
       ) : (
-        <div className="w-full space-y-4">
-          {data.posts.map((post) => (
-            <FeedItem key={post.id} post={post} />
-          ))}
-        </div>
+        <SortableFeedList posts={data.posts} />
       )}
     </section>
   );
