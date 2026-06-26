@@ -43,7 +43,7 @@ export default async function ProfilePage({
   const [{ data: allLikes }, { data: myLikes }] =
     postIds.length > 0
       ? await Promise.all([
-          admin.from("likes").select("post_id").in("post_id", postIds),
+          admin.from("likes").select("post_id, profiles(display_name)").in("post_id", postIds),
           user
             ? admin
                 .from("likes")
@@ -55,8 +55,14 @@ export default async function ProfilePage({
       : [{ data: [] }, { data: [] }];
 
   const likeCountMap = new Map<string, number>();
-  for (const l of allLikes ?? []) {
+  const likerNamesMap = new Map<string, string[]>();
+  for (const l of (allLikes ?? []) as unknown as { post_id: string; profiles: { display_name: string } | null }[]) {
     likeCountMap.set(l.post_id, (likeCountMap.get(l.post_id) ?? 0) + 1);
+    if (l.profiles?.display_name) {
+      const names = likerNamesMap.get(l.post_id) ?? [];
+      names.push(l.profiles.display_name);
+      likerNamesMap.set(l.post_id, names);
+    }
   }
   const likedSet = new Set((myLikes ?? []).map((l) => l.post_id));
 
@@ -64,6 +70,7 @@ export default async function ProfilePage({
     ...p,
     likeCount: likeCountMap.get(p.id) ?? 0,
     isLiked: likedSet.has(p.id),
+    likers: likerNamesMap.get(p.id) ?? [],
   }));
 
   return (

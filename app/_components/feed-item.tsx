@@ -24,12 +24,14 @@ export type FeedPost = {
   } | null;
   likeCount?: number;
   isLiked?: boolean;
+  likers?: string[];
 };
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const tz = { timeZone: "America/New_York" };
+  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", ...tz });
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", ...tz });
   return `${date} · ${time}`;
 }
 
@@ -115,6 +117,7 @@ export function FeedItem({ post }: { post: FeedPost }) {
           postId={post.id}
           initialLiked={post.isLiked ?? false}
           initialCount={post.likeCount ?? 0}
+          initialLikers={post.likers ?? []}
         />
       </div>
     </article>

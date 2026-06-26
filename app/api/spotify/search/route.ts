@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   if (!q) return Response.json({ results: [] });
 
   const res = await fetch(
-    `https://itunes.apple.com/search?media=music&entity=song&limit=10&term=${encodeURIComponent(q)}`
+    `https://itunes.apple.com/search?media=music&entity=song&limit=25&term=${encodeURIComponent(q)}`
   );
 
   if (!res.ok)
@@ -35,5 +35,14 @@ export async function GET(request: NextRequest) {
     preview_url: track.previewUrl ?? null,
   }));
 
-  return Response.json({ results });
+  // Sort to prioritize songs whose title matches the query closely
+  results.sort((a, b) => {
+    const aTitle = a.title.toLowerCase();
+    const bTitle = b.title.toLowerCase();
+    const rank = (t: string) =>
+      t === q ? 0 : t.startsWith(q) ? 1 : t.includes(q) ? 2 : 3;
+    return rank(aTitle) - rank(bTitle);
+  });
+
+  return Response.json({ results: results.slice(0, 10) });
 }
