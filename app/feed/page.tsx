@@ -104,8 +104,8 @@ export default async function FeedPage() {
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-zinc-400">
               {funCount === 0
-                ? "No responses yet"
-                : `${funCount} response${funCount === 1 ? "" : "s"}`}
+                ? "No songs yet"
+                : `${funCount} song${funCount === 1 ? "" : "s"} shared`}
             </p>
             <span className="text-zinc-300 group-hover:text-zinc-600 transition-colors text-lg">
               →
