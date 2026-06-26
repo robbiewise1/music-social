@@ -67,7 +67,7 @@ export default async function ProfilePage({
   }));
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <main className="w-full mx-auto max-w-2xl px-4 py-10">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="h-16 w-16 rounded-full bg-zinc-200 shrink-0" />

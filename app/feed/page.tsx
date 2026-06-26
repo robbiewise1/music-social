@@ -53,7 +53,7 @@ export default async function FeedPage() {
   });
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16">
+    <main className="w-full mx-auto max-w-2xl px-4 py-16">
       <p className="text-xs text-zinc-400 mb-2 text-center uppercase tracking-widest">
         {formatted}
       </p>

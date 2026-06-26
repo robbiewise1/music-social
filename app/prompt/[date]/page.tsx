@@ -106,7 +106,7 @@ export default async function PromptPage({
   });
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <main className="w-full mx-auto max-w-2xl px-4 py-10">
       <div className="flex items-center gap-3 mb-8">
         <Link href="/feed" className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">
           ← Home
