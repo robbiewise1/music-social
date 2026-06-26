@@ -131,6 +131,7 @@ body text, created_at timestamptz
 - [x] **M13 — Separate prompt type pages**: Each card now links to its own page (`/prompt/song-of-the-day`, `/prompt/daily-fun`). Each page shows today's + yesterday's prompt and posts. Tab switcher at the top lets you jump between the two. Fixed `createPost` upsert bug (partial unique index incompatible with Supabase `onConflict` column syntax — replaced with explicit select + insert/update). After posting, redirects back to the prompt page instead of home.
 - [x] **M14 — Deployment**: Live at `https://music-social-eta.vercel.app`. GitHub repo public (robbiewise1/music-social). All env vars set cleanly in Vercel (BOM issue resolved by re-adding via CLI). `robots.txt` + `noindex` metadata — app is link-only, not search-indexed. Email confirmation disabled; password-only signup. Supabase redirect URLs configured for production domain.
 - [x] **M15 — Post-launch polish**: Post timestamps in Eastern Time. Song search fetches 25 results from iTunes and re-ranks by title match so the typed song appears first. Tap like count to see who liked a post (works on mobile — inline dismiss on outside tap). Canada Day prompt seeded for July 1st. Git commits now use GitHub no-reply email instead of university email.
+- [x] **M16 — Sort posts**: "Recent" / "Most Liked" toggle on all prompt pages (song-of-the-day, daily-fun, and date-based prompt pages). Client-side sort via `SortableFeedList` component — no refetch. Controls only appear when 2+ posts exist.
 
 ## Production notes
 
