@@ -8,7 +8,8 @@ import type { SongResult } from "@/app/api/spotify/search/route";
 export async function createPost(
   song: SongResult,
   caption: string,
-  promptId?: string | null
+  promptId?: string | null,
+  promptType?: string | null
 ): Promise<{ error: string } | never> {
   const supabase = await createClient();
   const {
@@ -38,17 +39,34 @@ export async function createPost(
 
   if (songError || !songRow) return { error: "Failed to save song." };
 
-  const { error: postError } = await admin.from("posts").upsert(
-    {
-      user_id: user.id,
-      song_id: songRow.id,
-      caption: caption.trim() || null,
-      prompt_id: promptId ?? null,
-    },
-    { onConflict: "user_id,prompt_id", ignoreDuplicates: false }
-  );
+  if (promptId) {
+    const { data: existing } = await admin
+      .from("posts")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("prompt_id", promptId)
+      .maybeSingle();
 
-  if (postError) return { error: "Failed to create post." };
+    if (existing) {
+      const { error: updateError } = await admin
+        .from("posts")
+        .update({ song_id: songRow.id, caption: caption.trim() || null })
+        .eq("id", existing.id);
+      if (updateError) return { error: "Failed to update post." };
+    } else {
+      const { error: insertError } = await admin
+        .from("posts")
+        .insert({ user_id: user.id, song_id: songRow.id, caption: caption.trim() || null, prompt_id: promptId });
+      if (insertError) return { error: "Failed to create post." };
+    }
+  } else {
+    const { error: insertError } = await admin
+      .from("posts")
+      .insert({ user_id: user.id, song_id: songRow.id, caption: caption.trim() || null, prompt_id: null });
+    if (insertError) return { error: "Failed to create post." };
+  }
 
+  if (promptType === "song_of_the_day") redirect("/prompt/song-of-the-day");
+  if (promptType === "daily_fun") redirect("/prompt/daily-fun");
   redirect("/feed");
 }

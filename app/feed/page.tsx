@@ -63,7 +63,7 @@ export default async function FeedPage() {
 
       <div className="grid grid-cols-2 gap-4">
         <Link
-          href={`/prompt/${today}`}
+          href="/prompt/song-of-the-day"
           className="group flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 hover:border-zinc-400 hover:shadow-md transition-all min-h-48"
         >
           <div>
@@ -87,7 +87,7 @@ export default async function FeedPage() {
         </Link>
 
         <Link
-          href={`/prompt/${today}`}
+          href="/prompt/daily-fun"
           className="group flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 hover:border-zinc-400 hover:shadow-md transition-all min-h-48"
         >
           <div>

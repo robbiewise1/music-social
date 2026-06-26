@@ -18,7 +18,7 @@ export function ComposeForm({ todayPrompt }: { todayPrompt: Prompt }) {
     if (!selectedSong) return;
     setSubmitting(true);
     setError(null);
-    const result = await createPost(selectedSong, caption, todayPrompt?.id);
+    const result = await createPost(selectedSong, caption, todayPrompt?.id, todayPrompt?.prompt_type);
     if (result?.error) {
       setError(result.error);
       setSubmitting(false);
