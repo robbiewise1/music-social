@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { FeedItem, type FeedPost } from "@/app/_components/feed-item";
+import { NotificationToggle } from "@/app/_components/notification-toggle";
 
 export default async function ProfilePage({
   params,
@@ -86,6 +87,12 @@ export default async function ProfilePage({
           </div>
         </div>
       </div>
+
+      {user?.id === profile.id && (
+        <div className="mb-8">
+          <NotificationToggle />
+        </div>
+      )}
 
       {postsWithLikes.length === 0 ? (
         <p className="py-16 text-center text-sm text-zinc-400">No posts yet.</p>

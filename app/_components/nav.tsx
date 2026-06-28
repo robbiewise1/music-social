@@ -8,6 +8,16 @@ export async function Nav() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let username: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
+    username = profile?.username ?? null;
+  }
+
   return (
     <header className="border-b border-zinc-100 bg-white sticky top-0 z-10">
       <nav className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
@@ -20,6 +30,14 @@ export async function Nav() {
         <div className="flex items-center gap-4 text-sm">
           {user ? (
             <>
+              {username && (
+                <Link
+                  href={`/profile/${username}`}
+                  className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                >
+                  Profile
+                </Link>
+              )}
               <form action={logout}>
                 <button
                   type="submit"

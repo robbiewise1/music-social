@@ -16,29 +16,22 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
-  const { data: prompt } = await admin
-    .from("prompts")
-    .select("title")
-    .eq("active_date", today)
-    .eq("prompt_type", "song_of_the_day")
-    .maybeSingle();
-
   const { data: subscriptions } = await admin
     .from("push_subscriptions")
     .select("endpoint, p256dh, auth, user_id");
 
   if (!subscriptions?.length) return NextResponse.json({ sent: 0 });
 
-  // const { data: todayPosts } = await admin
-  //   .from("posts")
-  //   .select("user_id, prompts!inner(active_date)")
-  //   .eq("prompts.active_date", today);
-  // const postedUserIds = new Set((todayPosts ?? []).map((p) => p.user_id));
-  const targets = subscriptions; // temporarily send to everyone
+  const { data: todayPosts } = await admin
+    .from("posts")
+    .select("user_id, prompts!inner(active_date)")
+    .eq("prompts.active_date", today);
+  const postedUserIds = new Set((todayPosts ?? []).map((p) => p.user_id));
+  const targets = subscriptions.filter((s) => !postedUserIds.has(s.user_id));
 
   const payload = JSON.stringify({
     title: "Music Club",
-    body: prompt ? `Today's prompt: ${prompt.title} — post your song!` : "Post your song of the day!",
+    body: "Check out today's prompt!",
     url: "/feed",
   });
 

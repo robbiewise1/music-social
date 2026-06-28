@@ -40,15 +40,19 @@ export function PushPrompt() {
       });
 
       const json = sub.toJSON();
-      await savePushSubscription({
+      const result = await savePushSubscription({
         endpoint: json.endpoint!,
         p256dh: json.keys!.p256dh,
         auth: json.keys!.auth,
       });
 
+      if (result?.error) {
+        console.error("Failed to save push subscription:", result.error);
+      }
+
       setShow(false);
-    } catch {
-      // user declined or browser error
+    } catch (err) {
+      console.error("Push subscription error:", err);
     } finally {
       setLoading(false);
     }
