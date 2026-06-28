@@ -29,18 +29,16 @@ export async function GET(req: NextRequest) {
 
   if (!subscriptions?.length) return NextResponse.json({ sent: 0 });
 
-  // Find users who already posted today
-  const { data: todayPosts } = await admin
-    .from("posts")
-    .select("user_id, prompts!inner(active_date)")
-    .eq("prompts.active_date", today);
-
-  const postedUserIds = new Set((todayPosts ?? []).map((p) => p.user_id));
-  const targets = subscriptions.filter((s) => !postedUserIds.has(s.user_id));
+  // const { data: todayPosts } = await admin
+  //   .from("posts")
+  //   .select("user_id, prompts!inner(active_date)")
+  //   .eq("prompts.active_date", today);
+  // const postedUserIds = new Set((todayPosts ?? []).map((p) => p.user_id));
+  const targets = subscriptions; // temporarily send to everyone
 
   const payload = JSON.stringify({
     title: "Music Club",
-    body: prompt ? `Today's prompt: ${prompt.title}` : "Time to share today's song!",
+    body: prompt ? `Today's prompt: ${prompt.title} — post your song!` : "Post your song of the day!",
     url: "/feed",
   });
 

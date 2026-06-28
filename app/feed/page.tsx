@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { PushPrompt } from "@/app/_components/push-prompt";
+import { InstallPrompt } from "@/app/_components/install-prompt";
 
 export default async function FeedPage() {
   const supabase = await createClient();
@@ -55,6 +56,7 @@ export default async function FeedPage() {
 
   return (
     <main className="w-full mx-auto max-w-2xl px-4 py-16">
+      <InstallPrompt />
       <PushPrompt />
       <p className="text-xs text-zinc-400 mb-2 text-center uppercase tracking-widest">
         {formatted}

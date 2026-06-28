@@ -133,8 +133,15 @@ body text, created_at timestamptz
 - [x] **M15 — Post-launch polish**: Post timestamps in Eastern Time. Song search fetches 25 results from iTunes and re-ranks by title match so the typed song appears first. Tap like count to see who liked a post (works on mobile — inline dismiss on outside tap). Canada Day prompt seeded for July 1st. Git commits now use GitHub no-reply email instead of university email.
 - [x] **M16 — Sort posts**: "Recent" / "Most Liked" toggle on all prompt pages (song-of-the-day, daily-fun, and date-based prompt pages). Client-side sort via `SortableFeedList` component — no refetch. Controls only appear when 2+ posts exist.
 - [x] **M17 — Midnight EST date fix**: `new Date().toISOString()` returns UTC, causing the day to flip 4-5 hours early. Fixed in `feed/page.tsx` and `prompt-type-feed.tsx` using `toLocaleDateString("en-CA", { timeZone: "America/New_York" })` to get today's date in Eastern Time.
-- [x] **M18 — PWA**: `public/manifest.json` added. `layout.tsx` updated with `manifest`, `appleWebApp`, `icons`, and `viewport` (themeColor) exports. Icon placeholders reference `public/icons/` — files to be added when designed. Install hint added to landing page and signup page.
-- [x] **M19 — Push notifications**: `public/sw.js` service worker handles push + notificationclick. `ServiceWorkerRegister` client component registers SW in layout. `PushPrompt` client component on feed page shows "Enable" banner (iOS-only when in standalone mode, skips if permission already set). `app/actions/push.ts` saves subscriptions to `push_subscriptions` table. `app/api/cron/daily-reminder/route.ts` sends daily reminders via web-push at 10am EST (15:00 UTC) to users who haven't posted today; cleans up stale subscriptions. `vercel.json` registers the cron. Env vars: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `CRON_SECRET`.
+- [x] **M18 — PWA**: `public/manifest.json` added. `layout.tsx` updated with `manifest`, `appleWebApp`, `icons`, and `viewport` (themeColor) exports. Icon placeholders reference `public/icons/` — files to be added when designed. `InstallPrompt` client component on landing page and feed page — detects iOS vs Android, shows 4-step chip UI for iOS (··· → Share → Add to Home Screen → Add), uses `beforeinstallprompt` for one-tap Android install, auto-hides when already in standalone mode, dismisses to `localStorage`.
+- [x] **M19 — Push notifications**: `public/sw.js` service worker handles push + notificationclick. `ServiceWorkerRegister` client component registers SW in layout. `PushPrompt` client component on feed page shows "Enable" banner (iOS-only when in standalone mode, skips if permission already set). `app/actions/push.ts` saves subscriptions to `push_subscriptions` table. `app/api/cron/daily-reminder/route.ts` sends daily reminders via web-push at 10am EST (15:00 UTC) to users who haven't posted today; cleans up stale subscriptions. `vercel.json` registers the cron. Env vars: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `CRON_SECRET`. Notification body: `"Today's prompt: [title] — post your song!"`.
+
+## ⚠️ Temporary state (revert after notification test)
+
+The following changes were made for a one-time notification test on 2026-06-28 and must be reverted:
+
+1. **`vercel.json`** — cron schedule is `45 15 * * *` (11:45 AM EDT). Revert to `0 15 * * *` (10am EST / 11am EDT daily).
+2. **`app/api/cron/daily-reminder/route.ts`** — "already posted" filter is commented out so everyone receives the notification. Uncomment the `todayPosts` block and restore `const targets = subscriptions.filter(...)`.
 
 ## Production notes
 
@@ -144,6 +151,7 @@ body text, created_at timestamptz
 - Supabase free tier pauses after 7 days of inactivity (auto-resumes on next request, ~30s cold start)
 - Cron runs at 15:00 UTC = 10am EST / 11am EDT (no DST adjustment)
 - `webpush.setVapidDetails()` must be called inside the request handler, not at module level — Next.js evaluates module-level code at build time when env vars are unavailable
+- VAPID keys must be re-added via `printf | vercel env add` in Bash if they ever break — web UI and PowerShell echo both corrupt the value
 
 ## MVP definition of done
 
