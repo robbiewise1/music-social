@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LikeButton } from "./like-button";
+import { ReplyButton } from "./reply-button";
 
 export type FeedPost = {
   id: string;
@@ -25,6 +26,7 @@ export type FeedPost = {
   likeCount?: number;
   isLiked?: boolean;
   likers?: string[];
+  replyCount?: number;
 };
 
 function formatDate(dateStr: string): string {
@@ -112,13 +114,14 @@ export function FeedItem({ post }: { post: FeedPost }) {
         <p className="mt-3 text-sm text-zinc-700">{post.caption}</p>
       )}
 
-      <div className="mt-3 pt-3 border-t border-zinc-50">
+      <div className="mt-3 pt-3 border-t border-zinc-50 flex items-start gap-5">
         <LikeButton
           postId={post.id}
           initialLiked={post.isLiked ?? false}
           initialCount={post.likeCount ?? 0}
           initialLikers={post.likers ?? []}
         />
+        <ReplyButton postId={post.id} initialCount={post.replyCount ?? 0} />
       </div>
     </article>
   );

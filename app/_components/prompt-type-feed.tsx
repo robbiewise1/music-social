@@ -13,7 +13,7 @@ type PromptType = "song_of_the_day" | "daily_fun";
 
 type DaySectionData = {
   prompt: { id: string; title: string; description: string | null } | null;
-  posts: (PostWithUser & { likeCount: number; isLiked: boolean; likers: string[] })[];
+  posts: (PostWithUser & { likeCount: number; isLiked: boolean; likers: string[]; replyCount: number })[];
   userPosted: boolean;
 };
 
@@ -102,7 +102,7 @@ async function fetchDaySection(
   const posts = (rawPosts ?? []) as unknown as PostWithUser[];
   const postIds = posts.map((p) => p.id);
 
-  const [{ data: allLikes }, { data: myLikes }] =
+  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }] =
     postIds.length > 0
       ? await Promise.all([
           admin.from("likes").select("post_id, profiles(display_name)").in("post_id", postIds),
@@ -113,8 +113,9 @@ async function fetchDaySection(
                 .eq("user_id", userId)
                 .in("post_id", postIds)
             : Promise.resolve({ data: [] }),
+          admin.from("comments").select("post_id").in("post_id", postIds),
         ])
-      : [{ data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }];
 
   const likeCountMap = new Map<string, number>();
   const likerNamesMap = new Map<string, string[]>();
@@ -128,11 +129,17 @@ async function fetchDaySection(
   }
   const likedSet = new Set((myLikes ?? []).map((l) => l.post_id));
 
+  const replyCountMap = new Map<string, number>();
+  for (const c of (allReplies ?? []) as { post_id: string }[]) {
+    replyCountMap.set(c.post_id, (replyCountMap.get(c.post_id) ?? 0) + 1);
+  }
+
   const postsWithLikes = posts.map((p) => ({
     ...p,
     likeCount: likeCountMap.get(p.id) ?? 0,
     isLiked: likedSet.has(p.id),
     likers: likerNamesMap.get(p.id) ?? [],
+    replyCount: replyCountMap.get(p.id) ?? 0,
   }));
 
   const userPosted = userId ? posts.some((p) => p.user_id === userId) : false;

@@ -63,7 +63,7 @@ export default async function PromptPage({
 
   const allPostIds = [...sotdPosts, ...funPosts].map((p) => p.id);
 
-  const [{ data: allLikes }, { data: myLikes }] =
+  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }] =
     allPostIds.length > 0
       ? await Promise.all([
           admin.from("likes").select("post_id, profiles(display_name)").in("post_id", allPostIds),
@@ -74,8 +74,9 @@ export default async function PromptPage({
                 .eq("user_id", user.id)
                 .in("post_id", allPostIds)
             : Promise.resolve({ data: [] }),
+          admin.from("comments").select("post_id").in("post_id", allPostIds),
         ])
-      : [{ data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }];
 
   const likeCountMap = new Map<string, number>();
   const likerNamesMap = new Map<string, string[]>();
@@ -89,12 +90,18 @@ export default async function PromptPage({
   }
   const likedSet = new Set((myLikes ?? []).map((l) => l.post_id));
 
+  const replyCountMap = new Map<string, number>();
+  for (const c of (allReplies ?? []) as { post_id: string }[]) {
+    replyCountMap.set(c.post_id, (replyCountMap.get(c.post_id) ?? 0) + 1);
+  }
+
   function withLikes(posts: PostWithUser[]) {
     return posts.map((p) => ({
       ...p,
       likeCount: likeCountMap.get(p.id) ?? 0,
       isLiked: likedSet.has(p.id),
       likers: likerNamesMap.get(p.id) ?? [],
+      replyCount: replyCountMap.get(p.id) ?? 0,
     }));
   }
 
