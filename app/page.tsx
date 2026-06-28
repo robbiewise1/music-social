@@ -24,6 +24,9 @@ export default function LandingPage() {
           Sign in
         </Link>
       </div>
+      <p className="mt-8 text-sm text-zinc-400">
+        On iPhone? Open in Safari → tap Share → <span className="text-zinc-500 font-medium">Add to Home Screen</span> for the full app experience.
+      </p>
     </main>
   );
 }

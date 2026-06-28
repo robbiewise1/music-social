@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { PushPrompt } from "@/app/_components/push-prompt";
 
 export default async function FeedPage() {
   const supabase = await createClient();
@@ -10,7 +11,7 @@ export default async function FeedPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const admin = createAdminClient();
 
   const [{ data: sotd }, { data: funPrompt }] = await Promise.all([
@@ -54,6 +55,7 @@ export default async function FeedPage() {
 
   return (
     <main className="w-full mx-auto max-w-2xl px-4 py-16">
+      <PushPrompt />
       <p className="text-xs text-zinc-400 mb-2 text-center uppercase tracking-widest">
         {formatted}
       </p>

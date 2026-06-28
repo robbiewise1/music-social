@@ -28,7 +28,10 @@ export default function SignupPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-8">Create account</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 mb-2">Create account</h1>
+        <p className="text-sm text-zinc-400 mb-8">
+          On iPhone? After signing up, tap Share in Safari → <span className="text-zinc-500 font-medium">Add to Home Screen</span> to install the app.
+        </p>
         <form action={action} className="flex flex-col gap-4">
           <div>
             <label

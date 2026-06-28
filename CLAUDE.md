@@ -132,12 +132,18 @@ body text, created_at timestamptz
 - [x] **M14 — Deployment**: Live at `https://music-social-eta.vercel.app`. GitHub repo public (robbiewise1/music-social). All env vars set cleanly in Vercel (BOM issue resolved by re-adding via CLI). `robots.txt` + `noindex` metadata — app is link-only, not search-indexed. Email confirmation disabled; password-only signup. Supabase redirect URLs configured for production domain.
 - [x] **M15 — Post-launch polish**: Post timestamps in Eastern Time. Song search fetches 25 results from iTunes and re-ranks by title match so the typed song appears first. Tap like count to see who liked a post (works on mobile — inline dismiss on outside tap). Canada Day prompt seeded for July 1st. Git commits now use GitHub no-reply email instead of university email.
 - [x] **M16 — Sort posts**: "Recent" / "Most Liked" toggle on all prompt pages (song-of-the-day, daily-fun, and date-based prompt pages). Client-side sort via `SortableFeedList` component — no refetch. Controls only appear when 2+ posts exist.
+- [x] **M17 — Midnight EST date fix**: `new Date().toISOString()` returns UTC, causing the day to flip 4-5 hours early. Fixed in `feed/page.tsx` and `prompt-type-feed.tsx` using `toLocaleDateString("en-CA", { timeZone: "America/New_York" })` to get today's date in Eastern Time.
+- [x] **M18 — PWA**: `public/manifest.json` added. `layout.tsx` updated with `manifest`, `appleWebApp`, `icons`, and `viewport` (themeColor) exports. Icon placeholders reference `public/icons/` — files to be added when designed. Install hint added to landing page and signup page.
+- [x] **M19 — Push notifications**: `public/sw.js` service worker handles push + notificationclick. `ServiceWorkerRegister` client component registers SW in layout. `PushPrompt` client component on feed page shows "Enable" banner (iOS-only when in standalone mode, skips if permission already set). `app/actions/push.ts` saves subscriptions to `push_subscriptions` table. `app/api/cron/daily-reminder/route.ts` sends daily reminders via web-push at 10am EST (15:00 UTC) to users who haven't posted today; cleans up stale subscriptions. `vercel.json` registers the cron. Env vars: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `CRON_SECRET`.
 
 ## Production notes
 
 - Env vars must be set via CLI (`vercel env add`) not web UI — web UI paste can introduce BOM characters (U+FEFF) that break auth headers
+- Use `printf` (not `echo`) when piping secrets via Bash to avoid trailing newlines rejected by Vercel
 - All three Supabase env vars are Sensitive in Vercel; `vercel env pull` returns them as empty — this is expected
 - Supabase free tier pauses after 7 days of inactivity (auto-resumes on next request, ~30s cold start)
+- Cron runs at 15:00 UTC = 10am EST / 11am EDT (no DST adjustment)
+- `webpush.setVapidDetails()` must be called inside the request handler, not at module level — Next.js evaluates module-level code at build time when env vars are unavailable
 
 ## MVP definition of done
 
@@ -147,6 +153,7 @@ You and 5 friends can sign up, respond to today's prompt, see each other's posts
 
 - Comments (add week 2 post-launch)
 - Apple Music / universal links (use song.link/Odesli API later)
-- Notifications, DMs
+- DMs
 - "Currently playing" Spotify integration (requires user OAuth)
-- Mobile app, trending/discovery feed
+- Trending/discovery feed
+- PWA icons (pending design)

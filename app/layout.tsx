@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "./_components/nav";
 import { MobileNav } from "./_components/mobile-nav";
+import { ServiceWorkerRegister } from "./_components/service-worker-register";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,10 +15,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
   title: "Music Club",
   description: "Share songs with friends. Respond to daily music prompts.",
   robots: { index: false, follow: false },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Music Club",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +46,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col pb-16 sm:pb-0">
         <Nav />
+        <ServiceWorkerRegister />
         {children}
         <MobileNav />
       </body>

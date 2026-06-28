@@ -71,11 +71,9 @@ function DaySection({
 }
 
 function getDateStrings() {
-  const now = new Date();
-  const today = now.toISOString().split("T")[0];
-  const y = new Date(now);
-  y.setDate(y.getDate() - 1);
-  const yesterday = y.toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const [yr, mo, dy] = today.split("-").map(Number);
+  const yesterday = new Date(Date.UTC(yr, mo - 1, dy - 1)).toISOString().split("T")[0];
   return { today, yesterday };
 }
 
