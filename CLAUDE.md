@@ -47,18 +47,44 @@ SPOTIFY_CLIENT_SECRET           # same page
 
 ```
 app/
-├── page.tsx                  ← Landing page ✓
-├── layout.tsx                ← Root layout with <Nav /> ✓
-├── _components/nav.tsx       ← Auth-aware nav bar (server component) ✓
-├── actions/auth.ts           ← signup / login / logout server actions ✓
-├── login/page.tsx            ← Login form ✓
-├── signup/page.tsx           ← Signup form ✓
-├── feed/page.tsx             ← Stub
-├── compose/page.tsx          ← Stub
-├── search/page.tsx           ← Stub
-├── profile/[username]/       ← Stub
-├── prompt/[date]/            ← Stub
-└── api/spotify/search/       ← Stub
+├── page.tsx                          ← Landing page ✓
+├── layout.tsx                        ← Root layout with <Nav /> ✓
+├── _components/nav.tsx               ← Auth-aware nav bar (server component) ✓
+├── _components/feed-item.tsx         ← Song post feed item ✓
+├── _components/like-button.tsx       ← Like button for song posts ✓
+├── _components/reply-button.tsx      ← Reply button for song posts ✓
+├── _components/song-card.tsx         ← Song display card ✓
+├── _components/song-search-input.tsx ← Song search with debounce ✓
+├── _components/sortable-feed-list.tsx ← Sort toggle for song feeds ✓
+├── _components/album-card.tsx        ← Album display card ✓
+├── _components/album-search-input.tsx ← Album search with debounce ✓
+├── _components/album-feed-item.tsx   ← Album post feed item ✓
+├── _components/album-like-button.tsx ← Like button for album posts ✓
+├── _components/album-reply-button.tsx ← Reply button for album posts ✓
+├── _components/sortable-album-feed-list.tsx ← Sort toggle for album feeds ✓
+├── actions/auth.ts                   ← signup / login / logout server actions ✓
+├── actions/posts.ts                  ← createPost for songs ✓
+├── actions/likes.ts                  ← toggleLike for song posts ✓
+├── actions/replies.ts                ← fetchReplies / addReply for songs ✓
+├── actions/album-posts.ts            ← createAlbumPost ✓
+├── actions/album-likes.ts            ← toggleAlbumLike ✓
+├── actions/album-replies.ts          ← fetchAlbumReplies / addAlbumReply ✓
+├── login/page.tsx                    ← Login form ✓
+├── signup/page.tsx                   ← Signup form ✓
+├── feed/page.tsx                     ← Home screen with 3 prompt cards ✓
+├── compose/page.tsx                  ← Song compose page ✓
+├── compose/album/page.tsx            ← Album compose page ✓
+├── compose/album/album-compose-form.tsx ← Album compose form ✓
+├── search/page.tsx                   ← User search ✓
+├── profile/[username]/               ← Profile page ✓
+├── prompt/[date]/                    ← Date-based prompt page ✓
+├── prompt/song-of-the-day/           ← Song of the Day feed ✓
+├── prompt/daily-fun/                 ← Daily Prompt feed ✓
+├── prompt/album-of-the-week/page.tsx ← Album of the Week feed (weekly cadence) ✓
+└── api/
+    ├── spotify/search/               ← iTunes song search ✓
+    ├── itunes/album-search/          ← iTunes album search ✓
+    └── cron/daily-reminder/          ← Daily push notification cron ✓
 
 lib/supabase/
 ├── client.ts                 ← Browser Supabase client ✓
@@ -74,7 +100,7 @@ proxy.ts                      ← Route protection (Next.js 16) ✓
 - Email confirmation: disabled permanently (no custom SMTP; password-only signup)
 - `auth.users` is private — only accessible via Supabase dashboard or service role key
 
-## Database schema (implement in Milestone 3)
+## Database schema
 
 ```sql
 -- profiles (extends auth.users)
@@ -85,34 +111,60 @@ avatar_url text, bio text, created_at timestamptz
 follower_id uuid FK profiles, following_id uuid FK profiles,
 created_at timestamptz, PRIMARY KEY (follower_id, following_id)
 
--- songs (Spotify metadata cache — shared across all posts)
+-- songs (iTunes metadata cache — shared across all posts)
 id uuid PK, spotify_id text UNIQUE, title text, artist text,
 album text, album_art_url text, spotify_url text, preview_url text,
 created_at timestamptz
 
+-- albums (iTunes album metadata cache)
+id uuid PK, itunes_collection_id text UNIQUE, title text, artist text,
+album_art_url text, apple_music_url text, created_at timestamptz
+
 -- prompts
 id uuid PK, title text, description text,
-active_date date UNIQUE, created_at timestamptz
+active_date date, prompt_type text CHECK (prompt_type IN ('song_of_the_day','daily_fun','album_of_the_week')),
+UNIQUE (active_date, prompt_type), created_at timestamptz
+-- Note: album_of_the_week uses Monday of the week as active_date
 
--- posts
+-- posts (song posts)
 id uuid PK, user_id uuid FK profiles, song_id uuid FK songs,
 prompt_id uuid FK prompts (nullable), caption text, created_at timestamptz
 
--- likes
+-- album_posts (album posts — separate from song posts)
+id uuid PK, user_id uuid FK profiles, album_id uuid FK albums,
+prompt_id uuid FK prompts (nullable), caption text, created_at timestamptz,
+UNIQUE (user_id, prompt_id)
+
+-- likes (for song posts)
 user_id uuid FK profiles, post_id uuid FK posts,
 created_at timestamptz, PRIMARY KEY (user_id, post_id)
 
--- comments (build after launch)
+-- album_post_likes (for album posts)
+user_id uuid FK profiles, album_post_id uuid FK album_posts,
+created_at timestamptz, PRIMARY KEY (user_id, album_post_id)
+
+-- comments (for song posts)
 id uuid PK, user_id uuid FK profiles, post_id uuid FK posts,
 body text, created_at timestamptz
+
+-- album_post_comments (for album posts)
+id uuid PK, user_id uuid FK profiles, album_post_id uuid FK album_posts,
+body text CHECK (char_length(body) <= 150), created_at timestamptz
 ```
 
-## Spotify search flow (implement in Milestone 4)
+## iTunes search flows
 
-1. User types in composer → debounced call to `/api/spotify/search?q=...`
-2. Route handler gets/refreshes a Client Credentials token (cache it module-level with expiry check)
-3. Calls Spotify Search API, returns shaped results: `{ spotify_id, title, artist, album, album_art_url, spotify_url, preview_url }`
-4. On post submit: `UPSERT INTO songs ON CONFLICT (spotify_id) DO NOTHING`, then `INSERT INTO posts`
+**Song search:** `/api/spotify/search?q=...` → iTunes `entity=song` → returns `SongResult`
+
+**Album search:** `/api/itunes/album-search?q=...` → iTunes `entity=album` → returns `AlbumResult`
+Both use 350ms debounce and re-rank results by title match closeness.
+
+## Weekly cadence (Album of the Week)
+
+- Uses Monday of current week in EST as `active_date` in the prompts table
+- One post per user per prompt enforced via `UNIQUE (user_id, prompt_id)` on `album_posts`
+- Page shows "This Week" and "Last Week" sections (same pattern as daily prompt pages)
+- Seed new prompts each Monday by inserting into `prompts` with `prompt_type = 'album_of_the_week'` and `active_date = <that Monday's date>`
 
 ## Milestone progress
 
@@ -136,6 +188,7 @@ body text, created_at timestamptz
 - [x] **M18 — PWA**: `public/manifest.json` added. `layout.tsx` updated with `manifest`, `appleWebApp`, `icons`, and `viewport` (themeColor) exports. Icon placeholders reference `public/icons/` — files to be added when designed. `InstallPrompt` client component on landing page and feed page — detects iOS vs Android, shows 4-step chip UI for iOS (··· → Share → Add to Home Screen → Add), uses `beforeinstallprompt` for one-tap Android install, auto-hides when already in standalone mode, dismisses to `localStorage`.
 - [x] **M19 — Push notifications**: `public/sw.js` service worker handles push + notificationclick. `ServiceWorkerRegister` client component registers SW in layout. `PushPrompt` client component on feed page shows "Enable" banner (iOS-only when in standalone mode, skips if permission already set). `app/actions/push.ts` saves/deletes subscriptions in `push_subscriptions` table (admin client). `app/api/cron/daily-reminder/route.ts` sends daily reminders via web-push at 10am EST (15:00 UTC) to users who haven't posted today; cleans up stale 404/410 subscriptions. `vercel.json` registers the cron. Env vars: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `CRON_SECRET`. Notification body: `"Check out today's prompt!"`. `NotificationToggle` client component on own profile page lets users enable/disable at any time (also used to refresh a stale subscription after VAPID key changes). Nav now links to own profile for logged-in users.
 - [x] **M20 — Replies + engagement notifications**: `comments` table in Supabase (id, user_id, post_id, body, created_at; body capped at 150 chars via check constraint; RLS enabled). `app/actions/replies.ts` exposes `fetchReplies` and `addReply` server actions. `ReplyButton` client component sits beside the like button — shows chat bubble icon + count, expands inline on click to show replies and a submit form (lazy-loads replies on first open). Reply counts fetched server-side alongside like counts in `prompt-type-feed.tsx` and `prompt/[date]/page.tsx`. `lib/push.ts` shared helper `sendPushToUser(userId, payload)` looks up subscriptions, sends via web-push, and cleans stale 404/410 endpoints. `toggleLike` and `addReply` call this helper after a successful write — post owner gets "[Name] liked your song" or "[Name]: [reply preview]". No self-notifications.
+- [x] **M21 — Album of the Week**: New weekly prompt type (`album_of_the_week`). Separate DB tables: `albums`, `album_posts`, `album_post_likes`, `album_post_comments`. Album search via iTunes `entity=album` at `/api/itunes/album-search`. New components: `AlbumCard`, `AlbumSearchInput`, `AlbumFeedItem`, `AlbumLikeButton`, `AlbumReplyButton`, `SortableAlbumFeedList`. New pages: `/prompt/album-of-the-week` (shows This Week + Last Week), `/compose/album`. Home feed updated to show third card. Weekly cadence: uses Monday of current week in EST as `active_date`. Likes and replies are fully separate from song post system. Seed new album prompts each Monday via Supabase SQL editor.
 
 ## Production notes
 
@@ -146,6 +199,7 @@ body text, created_at timestamptz
 - Cron runs at 15:00 UTC = 10am EST / 11am EDT (no DST adjustment)
 - `webpush.setVapidDetails()` must be called inside the request handler, not at module level — Next.js evaluates module-level code at build time when env vars are unavailable
 - VAPID keys must be re-added via `printf | vercel env add` in Bash if they ever break — web UI and PowerShell echo both corrupt the value
+- Album of the Week prompts must be seeded manually each Monday via Supabase SQL editor
 
 ## MVP definition of done
 
