@@ -164,7 +164,7 @@ Both use 350ms debounce and re-rank results by title match closeness.
 - Uses Monday of current week in EST as `active_date` in the prompts table
 - One post per user per prompt enforced via `UNIQUE (user_id, prompt_id)` on `album_posts`
 - Page shows "This Week" and "Last Week" sections (same pattern as daily prompt pages)
-- Seed new prompts each Monday by inserting into `prompts` with `prompt_type = 'album_of_the_week'` and `active_date = <that Monday's date>`
+- Prompts are auto-seeded every Monday at midnight EST by the `/api/cron/seed-album-prompt` cron
 
 ## Milestone progress
 
@@ -189,6 +189,7 @@ Both use 350ms debounce and re-rank results by title match closeness.
 - [x] **M19 — Push notifications**: `public/sw.js` service worker handles push + notificationclick. `ServiceWorkerRegister` client component registers SW in layout. `PushPrompt` client component on feed page shows "Enable" banner (iOS-only when in standalone mode, skips if permission already set). `app/actions/push.ts` saves/deletes subscriptions in `push_subscriptions` table (admin client). `app/api/cron/daily-reminder/route.ts` sends daily reminders via web-push at 10am EST (15:00 UTC) to users who haven't posted today; cleans up stale 404/410 subscriptions. `vercel.json` registers the cron. Env vars: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL`, `CRON_SECRET`. Notification body: `"Check out today's prompt!"`. `NotificationToggle` client component on own profile page lets users enable/disable at any time (also used to refresh a stale subscription after VAPID key changes). Nav now links to own profile for logged-in users.
 - [x] **M20 — Replies + engagement notifications**: `comments` table in Supabase (id, user_id, post_id, body, created_at; body capped at 150 chars via check constraint; RLS enabled). `app/actions/replies.ts` exposes `fetchReplies` and `addReply` server actions. `ReplyButton` client component sits beside the like button — shows chat bubble icon + count, expands inline on click to show replies and a submit form (lazy-loads replies on first open). Reply counts fetched server-side alongside like counts in `prompt-type-feed.tsx` and `prompt/[date]/page.tsx`. `lib/push.ts` shared helper `sendPushToUser(userId, payload)` looks up subscriptions, sends via web-push, and cleans stale 404/410 endpoints. `toggleLike` and `addReply` call this helper after a successful write — post owner gets "[Name] liked your song" or "[Name]: [reply preview]". No self-notifications.
 - [x] **M21 — Album of the Week**: New weekly prompt type (`album_of_the_week`). Separate DB tables: `albums`, `album_posts`, `album_post_likes`, `album_post_comments`. Album search via iTunes `entity=album` at `/api/itunes/album-search`. New components: `AlbumCard`, `AlbumSearchInput`, `AlbumFeedItem`, `AlbumLikeButton`, `AlbumReplyButton`, `SortableAlbumFeedList`. New pages: `/prompt/album-of-the-week` (shows This Week + Last Week), `/compose/album`. Home feed updated to show third card. Weekly cadence: uses Monday of current week in EST as `active_date`. Likes and replies are fully separate from song post system. Seed new album prompts each Monday via Supabase SQL editor.
+- [x] **M22 — Auto-seed Album of the Week**: `app/api/cron/seed-album-prompt/route.ts` runs every Monday at midnight EST (05:00 UTC). Computes Monday's date in EST, checks for an existing prompt, and inserts `"Album of the Week"` if none exists (idempotent). Registered in `vercel.json` at `0 5 * * 1`. Uses existing `CRON_SECRET`. No more manual SQL seeding needed.
 
 ## Production notes
 
@@ -199,7 +200,7 @@ Both use 350ms debounce and re-rank results by title match closeness.
 - Cron runs at 15:00 UTC = 10am EST / 11am EDT (no DST adjustment)
 - `webpush.setVapidDetails()` must be called inside the request handler, not at module level — Next.js evaluates module-level code at build time when env vars are unavailable
 - VAPID keys must be re-added via `printf | vercel env add` in Bash if they ever break — web UI and PowerShell echo both corrupt the value
-- Album of the Week prompts must be seeded manually each Monday via Supabase SQL editor
+- Album of the Week prompts are auto-seeded every Monday at midnight EST via `/api/cron/seed-album-prompt` (idempotent — safe to trigger manually if needed)
 
 ## MVP definition of done
 
