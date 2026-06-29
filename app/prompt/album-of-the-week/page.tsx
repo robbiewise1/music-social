@@ -1,0 +1,186 @@
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import Link from "next/link";
+import { type AlbumFeedPost } from "@/app/_components/album-feed-item";
+import { SortableAlbumFeedList } from "@/app/_components/sortable-album-feed-list";
+
+const ALBUM_POST_SELECT = `id, caption, created_at, user_id,
+  profiles:profiles!album_posts_user_id_fkey ( username, display_name, avatar_url ),
+  albums ( title, artist, album_art_url, apple_music_url )`;
+
+type AlbumPostWithUser = AlbumFeedPost & { user_id: string };
+
+type WeekSectionData = {
+  prompt: { id: string; title: string; description: string | null } | null;
+  posts: AlbumFeedPost[];
+  userPosted: boolean;
+};
+
+function getWeekStrings() {
+  const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const [yr, mo, dy] = todayStr.split("-").map(Number);
+  const today = new Date(Date.UTC(yr, mo - 1, dy));
+  const dayOfWeek = today.getUTCDay();
+  const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const thisMonday = new Date(Date.UTC(yr, mo - 1, dy + daysToMonday));
+  const lastMonday = new Date(Date.UTC(yr, mo - 1, dy + daysToMonday - 7));
+  return {
+    thisWeek: thisMonday.toISOString().split("T")[0],
+    lastWeek: lastMonday.toISOString().split("T")[0],
+  };
+}
+
+function formatWeek(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  const end = new Date(dateStr + "T00:00:00");
+  end.setDate(end.getDate() + 6);
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  return `${d.toLocaleDateString("en-US", opts)} – ${end.toLocaleDateString("en-US", opts)}`;
+}
+
+async function fetchWeekSection(
+  weekStart: string,
+  userId: string | undefined
+): Promise<WeekSectionData> {
+  const admin = createAdminClient();
+
+  const { data: prompt } = await admin
+    .from("prompts")
+    .select("id, title, description")
+    .eq("active_date", weekStart)
+    .eq("prompt_type", "album_of_the_week")
+    .maybeSingle();
+
+  if (!prompt) return { prompt: null, posts: [], userPosted: false };
+
+  const { data: rawPosts } = await admin
+    .from("album_posts")
+    .select(ALBUM_POST_SELECT)
+    .eq("prompt_id", prompt.id)
+    .order("created_at", { ascending: false });
+
+  const posts = (rawPosts ?? []) as unknown as AlbumPostWithUser[];
+  const postIds = posts.map((p) => p.id);
+
+  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }] =
+    postIds.length > 0
+      ? await Promise.all([
+          admin.from("album_post_likes").select("album_post_id, profiles(display_name)").in("album_post_id", postIds),
+          userId
+            ? admin.from("album_post_likes").select("album_post_id").eq("user_id", userId).in("album_post_id", postIds)
+            : Promise.resolve({ data: [] }),
+          admin.from("album_post_comments").select("album_post_id").in("album_post_id", postIds),
+        ])
+      : [{ data: [] }, { data: [] }, { data: [] }];
+
+  const likeCountMap = new Map<string, number>();
+  const likerNamesMap = new Map<string, string[]>();
+  for (const l of (allLikes ?? []) as unknown as { album_post_id: string; profiles: { display_name: string } | null }[]) {
+    likeCountMap.set(l.album_post_id, (likeCountMap.get(l.album_post_id) ?? 0) + 1);
+    if (l.profiles?.display_name) {
+      const names = likerNamesMap.get(l.album_post_id) ?? [];
+      names.push(l.profiles.display_name);
+      likerNamesMap.set(l.album_post_id, names);
+    }
+  }
+  const likedSet = new Set((myLikes ?? []).map((l) => (l as { album_post_id: string }).album_post_id));
+  const replyCountMap = new Map<string, number>();
+  for (const c of (allReplies ?? []) as { album_post_id: string }[]) {
+    replyCountMap.set(c.album_post_id, (replyCountMap.get(c.album_post_id) ?? 0) + 1);
+  }
+
+  const postsWithLikes = posts.map((p) => ({
+    ...p,
+    likeCount: likeCountMap.get(p.id) ?? 0,
+    isLiked: likedSet.has(p.id),
+    likers: likerNamesMap.get(p.id) ?? [],
+    replyCount: replyCountMap.get(p.id) ?? 0,
+  }));
+
+  const userPosted = userId ? posts.some((p) => p.user_id === userId) : false;
+
+  return { prompt, posts: postsWithLikes, userPosted };
+}
+
+export default async function AlbumOfTheWeekPage() {
+  const { thisWeek, lastWeek } = getWeekStrings();
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [thisWeekData, lastWeekData] = await Promise.all([
+    fetchWeekSection(thisWeek, user?.id),
+    fetchWeekSection(lastWeek, user?.id),
+  ]);
+
+  return (
+    <main className="w-full mx-auto max-w-2xl px-4 py-10">
+      <div className="flex items-center gap-3 mb-8">
+        <Link href="/feed" className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">
+          ← Home
+        </Link>
+      </div>
+
+      <div className="flex gap-2 mb-10 flex-wrap">
+        <span className="px-4 py-2 rounded-full bg-zinc-900 text-white text-sm font-medium">
+          Album of the Week
+        </span>
+        <Link href="/prompt/song-of-the-day" className="px-4 py-2 rounded-full border border-zinc-200 text-zinc-500 text-sm font-medium hover:border-zinc-400 hover:text-zinc-900 transition-colors">
+          Song of the Day
+        </Link>
+        <Link href="/prompt/daily-fun" className="px-4 py-2 rounded-full border border-zinc-200 text-zinc-500 text-sm font-medium hover:border-zinc-400 hover:text-zinc-900 transition-colors">
+          Daily Prompt
+        </Link>
+      </div>
+
+      {thisWeekData.prompt ? (
+        <section className="mb-14 w-full">
+          <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">
+            This Week · {formatWeek(thisWeek)}
+          </p>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-1">{thisWeekData.prompt.title}</h2>
+          {thisWeekData.prompt.description && (
+            <p className="text-sm text-zinc-500 mb-6">{thisWeekData.prompt.description}</p>
+          )}
+          {user && (
+            <Link
+              href={`/compose/album?prompt_id=${thisWeekData.prompt.id}`}
+              className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+            >
+              {thisWeekData.userPosted ? "Change your album" : "+ Post your album"}
+            </Link>
+          )}
+          {thisWeekData.posts.length === 0 ? (
+            <p className="py-12 text-center text-sm text-zinc-400">No albums yet — be the first!</p>
+          ) : (
+            <SortableAlbumFeedList posts={thisWeekData.posts} />
+          )}
+        </section>
+      ) : (
+        <section className="mb-14 w-full">
+          <p className="py-12 text-center text-sm text-zinc-400">No album prompt this week yet.</p>
+        </section>
+      )}
+
+      {lastWeekData.prompt && (
+        <>
+          <hr className="border-zinc-100 mb-14" />
+          <section className="mb-14 w-full">
+            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-1">
+              Last Week · {formatWeek(lastWeek)}
+            </p>
+            <h2 className="text-2xl font-bold text-zinc-900 mb-1">{lastWeekData.prompt.title}</h2>
+            {lastWeekData.prompt.description && (
+              <p className="text-sm text-zinc-500 mb-6">{lastWeekData.prompt.description}</p>
+            )}
+            {lastWeekData.posts.length === 0 ? (
+              <p className="py-12 text-center text-sm text-zinc-400">No albums posted last week.</p>
+            ) : (
+              <SortableAlbumFeedList posts={lastWeekData.posts} />
+            )}
+          </section>
+        </>
+      )}
+    </main>
+  );
+}
