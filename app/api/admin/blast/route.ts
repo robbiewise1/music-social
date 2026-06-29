@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import webpush from "web-push";
 
+const TEMP_SECRET = "albumweek2026";
+
 export async function GET(req: NextRequest) {
   webpush.setVapidDetails(
     `mailto:${process.env.VAPID_EMAIL}`,
@@ -9,7 +11,7 @@ export async function GET(req: NextRequest) {
     process.env.VAPID_PRIVATE_KEY!
   );
 
-  if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (req.nextUrl.searchParams.get("secret") !== TEMP_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
