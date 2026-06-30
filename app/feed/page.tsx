@@ -64,9 +64,12 @@ export default async function FeedPage() {
       <p className="text-xs text-zinc-400 mb-2 text-center uppercase tracking-widest">
         {formatted}
       </p>
-      <h1 className="text-3xl font-bold text-zinc-900 mb-10 text-center">
+      <h1 className="text-3xl font-bold text-zinc-900 mb-1 text-center">
         Today&apos;s prompts
       </h1>
+      <p className="text-xs text-zinc-400 text-center mb-10">
+        Post a song today to add to your streak!
+      </p>
 
       {isFriday && (
         <Link
