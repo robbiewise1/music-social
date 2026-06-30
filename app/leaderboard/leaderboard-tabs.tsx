@@ -28,6 +28,12 @@ export function LeaderboardTabs({
       : b.longestStreak - a.longestStreak || b.currentStreak - a.currentStreak
   );
 
+  // Show top 5, but include everyone tied at 5th place.
+  const cutoff = sorted[4] ? (view === "current" ? sorted[4].currentStreak : sorted[4].longestStreak) : 0;
+  const visible = sorted.filter((e) =>
+    (view === "current" ? e.currentStreak : e.longestStreak) >= cutoff
+  );
+
   return (
     <div>
       <div className="flex gap-2 mb-6">
@@ -53,13 +59,13 @@ export function LeaderboardTabs({
         </button>
       </div>
 
-      {sorted.length === 0 ? (
+      {visible.length === 0 ? (
         <p className="py-16 text-center text-sm text-zinc-400">
           No streaks yet — post a song to get on the board!
         </p>
       ) : (
         <div className="space-y-2">
-          {sorted.map((entry, i) => {
+          {visible.map((entry, i) => {
             const isMe = entry.userId === currentUserId;
             const streak =
               view === "current" ? entry.currentStreak : entry.longestStreak;
