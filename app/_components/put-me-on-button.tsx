@@ -58,7 +58,7 @@ export function PutMeOnButton({
         <path d="M10 22h4" />
         <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
       </svg>
-      <span className="text-xs">Put me on</span>
+      <span className="text-xs">New to me</span>
       {count > 0 && (
         <span className="text-xs text-zinc-400">{count}</span>
       )}
