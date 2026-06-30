@@ -9,14 +9,26 @@ export default async function LeaderboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const easternFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+  const threeDaysAgoEastern = easternFormatter.format(threeDaysAgo);
+
   // Two separate ordered queries so neither "currently active" nor "all-time"
   // leaders are silently excluded by the other sort's LIMIT.
+  // Current streak tab only shows users active in the last 3 days.
   const SELECT = "user_id, current_streak, longest_streak, profiles(username, display_name)";
   const [byCurrentRes, byLongestRes] = await Promise.all([
     supabase
       .from("streaks")
       .select(SELECT)
       .gt("current_streak", 0)
+      .gte("last_post_date", threeDaysAgoEastern)
       .order("current_streak", { ascending: false })
       .limit(50),
     supabase
