@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LikeButton } from "./like-button";
 import { ReplyButton } from "./reply-button";
+import { PutMeOnButton } from "./put-me-on-button";
 
 export type FeedPost = {
   id: string;
@@ -27,6 +28,9 @@ export type FeedPost = {
   isLiked?: boolean;
   likers?: string[];
   replyCount?: number;
+  putOnCount?: number;
+  isPutOn?: boolean;
+  isOwnPost?: boolean;
 };
 
 function formatDate(dateStr: string): string {
@@ -122,6 +126,13 @@ export function FeedItem({ post }: { post: FeedPost }) {
           initialLikers={post.likers ?? []}
         />
         <ReplyButton postId={post.id} initialCount={post.replyCount ?? 0} />
+        {!post.isOwnPost && (
+          <PutMeOnButton
+            postId={post.id}
+            initialPutOn={post.isPutOn ?? false}
+            initialCount={post.putOnCount ?? 0}
+          />
+        )}
       </div>
     </article>
   );

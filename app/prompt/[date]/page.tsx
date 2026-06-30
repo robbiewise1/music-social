@@ -63,20 +63,20 @@ export default async function PromptPage({
 
   const allPostIds = [...sotdPosts, ...funPosts].map((p) => p.id);
 
-  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }] =
+  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }, { data: allPutOns }, { data: myPutOns }] =
     allPostIds.length > 0
       ? await Promise.all([
           admin.from("likes").select("post_id, profiles(display_name)").in("post_id", allPostIds),
           user
-            ? admin
-                .from("likes")
-                .select("post_id")
-                .eq("user_id", user.id)
-                .in("post_id", allPostIds)
+            ? admin.from("likes").select("post_id").eq("user_id", user.id).in("post_id", allPostIds)
             : Promise.resolve({ data: [] }),
           admin.from("comments").select("post_id").in("post_id", allPostIds),
+          admin.from("put_ons").select("post_id").in("post_id", allPostIds),
+          user
+            ? admin.from("put_ons").select("post_id").eq("user_id", user.id).in("post_id", allPostIds)
+            : Promise.resolve({ data: [] }),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   const likeCountMap = new Map<string, number>();
   const likerNamesMap = new Map<string, string[]>();
@@ -95,6 +95,12 @@ export default async function PromptPage({
     replyCountMap.set(c.post_id, (replyCountMap.get(c.post_id) ?? 0) + 1);
   }
 
+  const putOnCountMap = new Map<string, number>();
+  for (const p of (allPutOns ?? []) as { post_id: string }[]) {
+    putOnCountMap.set(p.post_id, (putOnCountMap.get(p.post_id) ?? 0) + 1);
+  }
+  const putOnSet = new Set((myPutOns ?? []).map((p) => p.post_id));
+
   function withLikes(posts: PostWithUser[]) {
     return posts.map((p) => ({
       ...p,
@@ -102,6 +108,9 @@ export default async function PromptPage({
       isLiked: likedSet.has(p.id),
       likers: likerNamesMap.get(p.id) ?? [],
       replyCount: replyCountMap.get(p.id) ?? 0,
+      putOnCount: putOnCountMap.get(p.id) ?? 0,
+      isPutOn: putOnSet.has(p.id),
+      isOwnPost: user ? p.user_id === user.id : false,
     }));
   }
 
