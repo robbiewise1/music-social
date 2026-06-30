@@ -26,7 +26,6 @@ export async function scheduleShabbosPost(
 
   const admin = createAdminClient();
 
-  // Upsert song into shared cache (same pattern as createPost)
   const { data: songRow, error: songError } = await admin
     .from("songs")
     .upsert(
@@ -51,34 +50,50 @@ export async function scheduleShabbosPost(
   });
   const targetDate = nextSaturday(today);
 
-  // Guard: don't overwrite an already-published scheduled post
-  const { data: existing } = await admin
-    .from("scheduled_posts")
-    .select("status")
-    .eq("user_id", user.id)
-    .eq("target_date", targetDate)
-    .maybeSingle();
+  // Use INSERT + conditional UPDATE instead of a plain upsert so we never
+  // blindly overwrite a 'published' row (TOCTOU: the Saturday cron could fire
+  // between the old read-check and the write).
+  const { error: insertError } = await admin.from("scheduled_posts").insert({
+    user_id: user.id,
+    song_id: songRow.id,
+    target_date: targetDate,
+    caption: caption.trim() || null,
+    status: "pending",
+  });
 
-  if (existing?.status === "published") {
-    return {
-      error:
-        "Your Shabbos song for this Saturday was already posted. You can edit the post directly.",
-    };
+  if (!insertError) {
+    // Fresh insert succeeded — done.
+    redirect("/shabbos");
   }
 
-  const { error: scheduleError } = await admin.from("scheduled_posts").upsert(
-    {
-      user_id: user.id,
+  if (insertError.code !== "23505") {
+    // Unexpected error (not a uniqueness conflict).
+    return { error: "Failed to schedule post." };
+  }
+
+  // Row already exists — update it, but only if it hasn't been published yet.
+  const { data: updated, error: updateError } = await admin
+    .from("scheduled_posts")
+    .update({
       song_id: songRow.id,
-      target_date: targetDate,
       caption: caption.trim() || null,
       status: "pending",
       published_at: null,
-    },
-    { onConflict: "user_id,target_date" }
-  );
+    })
+    .eq("user_id", user.id)
+    .eq("target_date", targetDate)
+    .neq("status", "published")
+    .select("id");
 
-  if (scheduleError) return { error: "Failed to schedule post." };
+  if (updateError) return { error: "Failed to schedule post." };
+
+  if (!updated?.length) {
+    // 0 rows updated means the row exists but is already 'published'.
+    return {
+      error:
+        "Your Shabbos song for this Saturday was already posted. You can edit the post directly from your profile.",
+    };
+  }
 
   redirect("/shabbos");
 }
@@ -94,14 +109,22 @@ export async function cancelShabbosPost(
 
   const admin = createAdminClient();
 
-  const { error } = await admin
+  const { data: updated, error } = await admin
     .from("scheduled_posts")
     .update({ status: "cancelled" })
     .eq("user_id", user.id)
     .eq("target_date", targetDate)
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .select("id");
 
   if (error) return { error: "Failed to cancel scheduled post." };
+
+  if (!updated?.length) {
+    // 0 rows — cron already published or cancelled it.
+    return {
+      error: "Could not cancel — your post may have already been published.",
+    };
+  }
 
   redirect("/shabbos");
 }

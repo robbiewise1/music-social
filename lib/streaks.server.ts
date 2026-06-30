@@ -12,7 +12,8 @@ export async function recomputeUserStreak(userId: string): Promise<void> {
   const { data: posts, error } = await admin
     .from("posts")
     .select("created_at")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("[streaks] Failed to fetch posts:", error.message);

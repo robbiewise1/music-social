@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import type { SongResult } from "@/app/api/spotify/search/route";
 import { nextSaturday } from "@/app/actions/shabbos";
@@ -12,31 +11,37 @@ export default async function ShabbosPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const admin = createAdminClient();
-
   const today = new Date().toLocaleDateString("en-CA", {
     timeZone: "America/Toronto",
   });
-  const targetDate = nextSaturday(today);
+  const [ty, tm, td] = today.split("-").map(Number);
+  const isSaturday = new Date(Date.UTC(ty, tm - 1, td)).getUTCDay() === 6;
+  const upcomingSaturday = nextSaturday(today);
 
-  const { data: scheduled } = await admin
+  // On Saturday, also query today so we can show the confirmation for a post
+  // that was auto-published earlier today. nextSaturday(saturday) returns +7,
+  // so without this the confirmation block would never render on the day it matters.
+  const datesToQuery = isSaturday ? [today, upcomingSaturday] : [upcomingSaturday];
+
+  const { data: rows } = await supabase
     .from("scheduled_posts")
     .select(
       "target_date, caption, status, songs(spotify_id, title, artist, album, album_art_url, spotify_url, preview_url)"
     )
     .eq("user_id", user.id)
-    .eq("target_date", targetDate)
-    .maybeSingle();
+    .in("target_date", datesToQuery);
 
-  const hasPending = scheduled?.status === "pending";
-  const alreadyPublished = scheduled?.status === "published";
+  // Today's row (only relevant on Saturday) tells us what the cron did.
+  const todayRow = isSaturday ? rows?.find((r) => r.target_date === today) : null;
+  // Next Saturday's row drives the scheduling form.
+  const nextRow = rows?.find((r) => r.target_date === upcomingSaturday) ?? null;
 
-  // Map stored song row → SongResult shape for pre-filling the form
+  const alreadyPublished = todayRow?.status === "published";
+  const hasPending = nextRow?.status === "pending";
+
   let initialSong: SongResult | null = null;
-  if (hasPending && scheduled?.songs) {
-    const s = Array.isArray(scheduled.songs)
-      ? scheduled.songs[0]
-      : scheduled.songs;
+  if (hasPending && nextRow?.songs) {
+    const s = Array.isArray(nextRow.songs) ? nextRow.songs[0] : nextRow.songs;
     initialSong = {
       track_id: s.spotify_id,
       title: s.title,
@@ -60,7 +65,7 @@ export default async function ShabbosPage() {
         <div className="rounded-xl border border-zinc-100 bg-white p-6 text-center space-y-2">
           <p className="text-2xl">✓</p>
           <p className="text-sm font-medium text-zinc-900">
-            Your Shabbos song was posted Saturday at noon.
+            Your Shabbos song was posted today at noon.
           </p>
           <p className="text-xs text-zinc-400">
             You can find it in your profile and edit it there.
@@ -68,9 +73,9 @@ export default async function ShabbosPage() {
         </div>
       ) : (
         <ShabbosForm
-          targetDate={targetDate}
+          targetDate={upcomingSaturday}
           initialSong={initialSong}
-          initialCaption={scheduled?.caption ?? ""}
+          initialCaption={nextRow?.caption ?? ""}
           hasPending={hasPending}
         />
       )}

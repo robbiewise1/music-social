@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
     timeZone: "America/Toronto",
   });
 
-  // All pending scheduled posts whose target date is today (Eastern)
   const { data: pending, error: fetchError } = await admin
     .from("scheduled_posts")
     .select("id, user_id, song_id, caption, target_date")
@@ -35,7 +34,8 @@ export async function GET(req: NextRequest) {
 
   await Promise.all(
     pending.map(async (item) => {
-      // Check if the user already has any post for today (Eastern) — within last 30h to be safe
+      // Check if the user already has any post for today (Eastern) — 30h window
+      // covers the full Eastern day regardless of DST; JS date filter is authoritative.
       const since = new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString();
       const { data: recentPosts } = await admin
         .from("posts")
@@ -51,7 +51,6 @@ export async function GET(req: NextRequest) {
       );
 
       if (!hasPostToday) {
-        // Create the post as a regular free-form post
         const { error: insertError } = await admin.from("posts").insert({
           user_id: item.user_id,
           song_id: item.song_id,
@@ -64,21 +63,42 @@ export async function GET(req: NextRequest) {
             `[shabbos-publish] Failed to create post for user ${item.user_id}:`,
             insertError.message
           );
-          return; // leave status as 'pending' so we can retry
+          return; // leave status 'pending' so the 17:00 UTC cron can retry
         }
 
         await recomputeUserStreak(item.user_id);
         published++;
-      } else {
-        skipped++;
-      }
 
-      // Mark as published whether we created the post or the user already posted —
-      // either way the streak is intact and there's nothing left to do.
-      await admin
-        .from("scheduled_posts")
-        .update({ status: "published", published_at: new Date().toISOString() })
-        .eq("id", item.id);
+        // Mark as published only when we actually created the post
+        const { error: statusError } = await admin
+          .from("scheduled_posts")
+          .update({ status: "published", published_at: new Date().toISOString() })
+          .eq("id", item.id);
+
+        if (statusError) {
+          console.error(
+            `[shabbos-publish] Failed to mark ${item.id} as published:`,
+            statusError.message
+          );
+          // Post was created — streak is intact. Second cron run will retry the status update.
+        }
+      } else {
+        // User already posted today; mark 'cancelled' so the page can distinguish
+        // "we auto-posted" (published) from "user already had it covered" (cancelled).
+        skipped++;
+
+        const { error: statusError } = await admin
+          .from("scheduled_posts")
+          .update({ status: "cancelled", published_at: new Date().toISOString() })
+          .eq("id", item.id);
+
+        if (statusError) {
+          console.error(
+            `[shabbos-publish] Failed to mark ${item.id} as cancelled:`,
+            statusError.message
+          );
+        }
+      }
     })
   );
 
