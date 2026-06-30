@@ -64,7 +64,7 @@ export default async function FeedPage() {
       <div className="mb-6 rounded-2xl border border-violet-100 bg-violet-50 px-5 py-4">
         <p className="text-sm font-semibold text-violet-900 mb-1">New: Put Ons 💡</p>
         <p className="text-sm text-violet-700">
-          Hear a song you didn&apos;t know before? Tap <span className="font-medium">New to me</span> to give credit to the friend who put you on. The leaderboard now tracks who&apos;s putting people onto the most music — and who&apos;s discovering the most.
+          Hear a song you didn&apos;t know before? Tap the <span className="font-medium">&ldquo;New to me&rdquo;</span> to give credit to the friend who put you on. The leaderboard now tracks who&apos;s putting people onto the most music — and who&apos;s discovering the most.
         </p>
       </div>
       <p className="text-xs text-zinc-400 mb-2 text-center uppercase tracking-widest">
