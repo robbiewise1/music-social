@@ -54,6 +54,9 @@ export default async function FeedPage() {
     day: "numeric",
   });
 
+  const [ty, tm, td] = today.split("-").map(Number);
+  const isFriday = new Date(Date.UTC(ty, tm - 1, td)).getUTCDay() === 5;
+
   return (
     <main className="w-full mx-auto max-w-2xl px-4 py-16">
       <InstallPrompt />
@@ -64,6 +67,25 @@ export default async function FeedPage() {
       <h1 className="text-3xl font-bold text-zinc-900 mb-10 text-center">
         Today&apos;s prompts
       </h1>
+
+      {isFriday && (
+        <Link
+          href="/shabbos"
+          className="group flex items-center justify-between rounded-2xl border border-zinc-200 bg-white px-6 py-4 mb-4 hover:border-zinc-400 hover:shadow-md transition-all"
+        >
+          <div>
+            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-0.5">
+              Shabbos Mode
+            </p>
+            <p className="text-sm font-semibold text-zinc-900">
+              Schedule a song for tomorrow so your streak stays alive
+            </p>
+          </div>
+          <span className="ml-4 text-zinc-300 group-hover:text-zinc-600 transition-colors text-lg shrink-0">
+            →
+          </span>
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Link

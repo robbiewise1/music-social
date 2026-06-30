@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/seed-album-prompt",
       "schedule": "0 5 * * 1"
+    },
+    {
+      "path": "/api/cron/shabbos-publish",
+      "schedule": "0 16 * * 6"
+    },
+    {
+      "path": "/api/cron/shabbos-publish",
+      "schedule": "0 17 * * 6"
     }
   ]
 }

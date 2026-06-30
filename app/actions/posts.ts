@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import type { SongResult } from "@/app/api/spotify/search/route";
+import { recomputeUserStreak } from "@/lib/streaks.server";
 
 export async function createPost(
   song: SongResult,
@@ -65,6 +66,8 @@ export async function createPost(
       .insert({ user_id: user.id, song_id: songRow.id, caption: caption.trim() || null, prompt_id: null });
     if (insertError) return { error: "Failed to create post." };
   }
+
+  await recomputeUserStreak(user.id);
 
   if (promptType === "song_of_the_day") redirect("/prompt/song-of-the-day");
   if (promptType === "daily_fun") redirect("/prompt/daily-fun");
