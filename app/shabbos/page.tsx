@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { SongResult } from "@/app/api/spotify/search/route";
-import { nextSaturday } from "@/app/actions/shabbos";
+import { nextSaturday } from "@/lib/dates";
 import { ShabbosForm } from "./shabbos-form";
 
 export default async function ShabbosPage() {
