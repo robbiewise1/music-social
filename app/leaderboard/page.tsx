@@ -22,7 +22,7 @@ export default async function LeaderboardPage() {
   // Two separate ordered queries so neither "currently active" nor "all-time"
   // leaders are silently excluded by the other sort's LIMIT.
   // Current streak tab only shows users active in the last 3 days.
-  const SELECT = "user_id, current_streak, longest_streak, profiles(username, display_name)";
+  const SELECT = "user_id, current_streak, longest_streak, last_post_date";
   const [byCurrentRes, byLongestRes] = await Promise.all([
     supabase
       .from("streaks")
@@ -39,24 +39,39 @@ export default async function LeaderboardPage() {
       .limit(50),
   ]);
 
-  // Merge, keeping the first occurrence of each user (dedup by user_id)
+  // Merge, deduped by user_id (current first so it wins on overlap)
   const seen = new Set<string>();
-  const entries = [...(byCurrentRes.data ?? []), ...(byLongestRes.data ?? [])]
-    .filter((row) => {
+  const streakRows = [...(byCurrentRes.data ?? []), ...(byLongestRes.data ?? [])].filter(
+    (row) => {
       if (seen.has(row.user_id)) return false;
       seen.add(row.user_id);
       return true;
-    })
-    .map((row) => {
-      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-      return {
-        userId: row.user_id as string,
-        username: (profile?.username ?? "") as string,
-        displayName: (profile?.display_name ?? "") as string,
-        currentStreak: row.current_streak as number,
-        longestStreak: row.longest_streak as number,
-      };
-    });
+    }
+  );
+
+  // Fetch profiles separately to avoid relying on a FK relationship
+  const userIds = streakRows.map((r) => r.user_id);
+  const { data: profiles } = userIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, username, display_name")
+        .in("id", userIds)
+    : { data: [] };
+
+  const profileMap = new Map(
+    (profiles ?? []).map((p) => [p.id, p])
+  );
+
+  const entries = streakRows.map((row) => {
+    const profile = profileMap.get(row.user_id);
+    return {
+      userId: row.user_id as string,
+      username: (profile?.username ?? "") as string,
+      displayName: (profile?.display_name ?? "") as string,
+      currentStreak: row.current_streak as number,
+      longestStreak: row.longest_streak as number,
+    };
+  });
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
