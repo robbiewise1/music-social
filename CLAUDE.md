@@ -34,6 +34,7 @@ SPOTIFY_CLIENT_SECRET           # same page
 - **`proxy.ts` not `middleware.ts`** — route protection goes in `proxy.ts` at the project root, not `middleware.ts`. The export is `export default async function proxy(req)`.
 - **`cookies()` is async** — always `await cookies()` before calling `.get()` / `.set()`.
 - **Route handler params** — use `RouteContext<'/path/[param]'>` for typed params in route handlers.
+- **`"use server"` files: all exports must be async** — every export from a Server Actions file must be an `async function`. Non-async utility functions (even pure ones) will cause a build error. Move them to `lib/` instead.
 - Full docs are in `node_modules/next/dist/docs/` — read the relevant guide before writing any feature.
 
 ## Supabase helpers
@@ -84,11 +85,22 @@ app/
 └── api/
     ├── spotify/search/               ← iTunes song search ✓
     ├── itunes/album-search/          ← iTunes album search ✓
-    └── cron/daily-reminder/          ← Daily push notification cron ✓
+    ├── admin/backfill-streaks/       ← One-time streak backfill (secret-gated) ✓
+    └── cron/
+        ├── daily-reminder/           ← Daily push notification cron ✓
+        ├── seed-album-prompt/        ← Monday Album of the Week seed ✓
+        ├── shabbos-publish/          ← Saturday noon publish cron ✓
+        └── feature-announcement/     ← One-time push: 2026-06-30 7am ET ✓
 
 lib/supabase/
 ├── client.ts                 ← Browser Supabase client ✓
 └── server.ts                 ← Server Supabase client ✓
+
+lib/
+├── streaks.ts                ← Pure streak computation (testable, no DB) ✓
+├── streaks.server.ts         ← DB layer: recomputeUserStreak() ✓
+├── dates.ts                  ← Shared date helpers (nextSaturday) ✓
+└── push.ts                   ← Shared sendPushToUser() helper ✓
 
 proxy.ts                      ← Route protection (Next.js 16) ✓
 ```
@@ -190,6 +202,7 @@ Both use 350ms debounce and re-rank results by title match closeness.
 - [x] **M20 — Replies + engagement notifications**: `comments` table in Supabase (id, user_id, post_id, body, created_at; body capped at 150 chars via check constraint; RLS enabled). `app/actions/replies.ts` exposes `fetchReplies` and `addReply` server actions. `ReplyButton` client component sits beside the like button — shows chat bubble icon + count, expands inline on click to show replies and a submit form (lazy-loads replies on first open). Reply counts fetched server-side alongside like counts in `prompt-type-feed.tsx` and `prompt/[date]/page.tsx`. `lib/push.ts` shared helper `sendPushToUser(userId, payload)` looks up subscriptions, sends via web-push, and cleans stale 404/410 endpoints. `toggleLike` and `addReply` call this helper after a successful write — post owner gets "[Name] liked your song" or "[Name]: [reply preview]". No self-notifications.
 - [x] **M21 — Album of the Week**: New weekly prompt type (`album_of_the_week`). Separate DB tables: `albums`, `album_posts`, `album_post_likes`, `album_post_comments`. Album search via iTunes `entity=album` at `/api/itunes/album-search`. New components: `AlbumCard`, `AlbumSearchInput`, `AlbumFeedItem`, `AlbumLikeButton`, `AlbumReplyButton`, `SortableAlbumFeedList`. New pages: `/prompt/album-of-the-week` (shows This Week + Last Week), `/compose/album`. Home feed updated to show third card. Weekly cadence: uses Monday of current week in EST as `active_date`. Likes and replies are fully separate from song post system. Seed new album prompts each Monday via Supabase SQL editor.
 - [x] **M22 — Auto-seed Album of the Week**: `app/api/cron/seed-album-prompt/route.ts` runs every Monday at midnight EST (05:00 UTC). Computes Monday's date in EST, checks for an existing prompt, and inserts `"Album of the Week"` if none exists (idempotent). Registered in `vercel.json` at `0 5 * * 1`. Uses existing `CRON_SECRET`. No more manual SQL seeding needed.
+- [x] **M24 — Leaderboard polish and streak backfill**: Fixed build error: `nextSaturday` was a non-async export in a `"use server"` file — moved to `lib/dates.ts`. Fixed leaderboard blank screen: nested `profiles(username, display_name)` select failed silently because no FK exists between `streaks` and `profiles`; replaced with a separate `.in("id", userIds)` query on the profiles table. Added `/api/admin/backfill-streaks` endpoint (secret-gated) to seed the `streaks` table from existing post history for all users. Leaderboard "Current Streak" tab now filters to users active in the last 3 days (`last_post_date >= today - 3`); "All-Time Best" tab is unfiltered. Both tabs cap display at top 5, expanding ties at the cutoff. Added trophy icon to the desktop nav Leaderboard link. Added "Post a song today to add to your streak!" subtitle under "Today's prompts" on the feed. One-time feature announcement push notification scheduled for 2026-06-30 at 11:00 UTC (7am ET) via `/api/cron/feature-announcement` — includes a date guard so it's a no-op on any other day.
 - [x] **M23 — Daily streaks, leaderboard, and Shabbos Mode**: New `streaks` table (user_id PK, current_streak, longest_streak, last_post_date, updated_at) caches per-user streak data; new `scheduled_posts` table (id, user_id, song_id, target_date, caption, status, published_at; UNIQUE user_id+target_date) powers Shabbos Mode. Streak computation: pure `computeStreak()` in `lib/streaks.ts` runs gap-and-islands over distinct Eastern calendar dates from post history — all day boundaries in `America/Toronto`. Recomputed from scratch on every post write via `recomputeUserStreak()` in `lib/streaks.server.ts` (self-healing). 12 Vitest tests cover DST crossovers, deduplication, multi-gap histories. Leaderboard at `/leaderboard`: two parallel DB queries (top-50 by current streak + top-50 by longest streak) merged so all-time leaders never fall off the All-Time Best tab; client-side tab toggle with medal display; own row highlighted; added to desktop nav and mobile bottom nav (4 items: Home, Leaderboard, Search, Shabbos). Shabbos Mode at `/shabbos`: queue a song on Friday to auto-post at noon Eastern on Saturday; INSERT + conditional UPDATE (neq published) prevents TOCTOU overwrite; cancel checks row count and errors on 0 rows. Cron at `/api/cron/shabbos-publish` runs Saturday at 0 16 * * 6 (noon EDT) and 0 17 * * 6 (noon EST) — two entries cover DST; idempotent (skips if user already posted, marks status=cancelled; publishes and marks status=published only when it creates the post); error-checked status updates. Friday banner on feed page surfaces Shabbos scheduling in context. No new env vars needed (uses existing CRON_SECRET).
 
 ## Production notes
