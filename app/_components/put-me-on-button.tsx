@@ -87,7 +87,7 @@ export function PutMeOnButton({
         {count > 0 && (
           <button
             onClick={() => initialPutOners.length > 0 && setShowPutOners((v) => !v)}
-            className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="text-xs text-zinc-400 underline hover:text-zinc-600 transition-colors"
             aria-label="Show who was put on"
           >
             {count}

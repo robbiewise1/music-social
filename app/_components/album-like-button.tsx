@@ -80,7 +80,7 @@ export function AlbumLikeButton({
         {count > 0 && (
           <button
             onClick={() => initialLikers.length > 0 && setShowLikers((v) => !v)}
-            className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="text-xs text-zinc-400 underline hover:text-zinc-600 transition-colors"
           >
             {count}
           </button>
