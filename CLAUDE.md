@@ -157,11 +157,20 @@ created_at timestamptz, PRIMARY KEY (user_id, album_post_id)
 
 -- comments (for song posts)
 id uuid PK, user_id uuid FK profiles, post_id uuid FK posts,
-body text, created_at timestamptz
+body text, created_at timestamptz, parent_id uuid FK comments (nullable, self-ref, one level deep)
 
 -- album_post_comments (for album posts)
 id uuid PK, user_id uuid FK profiles, album_post_id uuid FK album_posts,
-body text CHECK (char_length(body) <= 150), created_at timestamptz
+body text CHECK (char_length(body) <= 150), created_at timestamptz,
+parent_id uuid FK album_post_comments (nullable, self-ref, one level deep)
+
+-- comment_likes (likes on song post comments)
+user_id uuid FK profiles, comment_id uuid FK comments,
+created_at timestamptz, PRIMARY KEY (user_id, comment_id)
+
+-- album_comment_likes (likes on album post comments)
+user_id uuid FK profiles, album_comment_id uuid FK album_post_comments,
+created_at timestamptz, PRIMARY KEY (user_id, album_comment_id)
 ```
 
 ## iTunes search flows
@@ -203,6 +212,7 @@ Both use 350ms debounce and re-rank results by title match closeness.
 - [x] **M21 — Album of the Week**: New weekly prompt type (`album_of_the_week`). Separate DB tables: `albums`, `album_posts`, `album_post_likes`, `album_post_comments`. Album search via iTunes `entity=album` at `/api/itunes/album-search`. New components: `AlbumCard`, `AlbumSearchInput`, `AlbumFeedItem`, `AlbumLikeButton`, `AlbumReplyButton`, `SortableAlbumFeedList`. New pages: `/prompt/album-of-the-week` (shows This Week + Last Week), `/compose/album`. Home feed updated to show third card. Weekly cadence: uses Monday of current week in EST as `active_date`. Likes and replies are fully separate from song post system. Seed new album prompts each Monday via Supabase SQL editor.
 - [x] **M22 — Auto-seed Album of the Week**: `app/api/cron/seed-album-prompt/route.ts` runs every Monday at midnight EST (05:00 UTC). Computes Monday's date in EST, checks for an existing prompt, and inserts `"Album of the Week"` if none exists (idempotent). Registered in `vercel.json` at `0 5 * * 1`. Uses existing `CRON_SECRET`. No more manual SQL seeding needed.
 - [x] **M24 — Leaderboard polish and streak backfill**: Fixed build error: `nextSaturday` was a non-async export in a `"use server"` file — moved to `lib/dates.ts`. Fixed leaderboard blank screen: nested `profiles(username, display_name)` select failed silently because no FK exists between `streaks` and `profiles`; replaced with a separate `.in("id", userIds)` query on the profiles table. Added `/api/admin/backfill-streaks` endpoint (secret-gated) to seed the `streaks` table from existing post history for all users. Leaderboard "Current Streak" tab now filters to users active in the last 3 days (`last_post_date >= today - 3`); "All-Time Best" tab is unfiltered. Both tabs cap display at top 5, expanding ties at the cutoff. Added trophy icon to the desktop nav Leaderboard link. Added "Post a song today to add to your streak!" subtitle under "Today's prompts" on the feed. One-time feature announcement push notification scheduled for 2026-06-30 at 11:00 UTC (7am ET) via `/api/cron/feature-announcement` — includes a date guard so it's a no-op on any other day.
+- [x] **M25 — Comment replies + comment likes**: One-level threaded replies and likes on comments, for both song posts and album posts. `parent_id` (self-FK, nullable) added to `comments` and `album_post_comments`; new `comment_likes` / `album_comment_likes` tables mirror the existing `likes` table shape (composite `user_id`+`comment_id` PK, same RLS pattern). Schema change is in `supabase/migrations/m25_comment_replies_and_likes.sql` — run manually in the Supabase SQL editor (this project applies comment-related schema changes that way, no CLI link). `fetchReplies`/`fetchAlbumReplies` now return `parent_id`, `like_count`, and `liked_by_me` per comment; `addReply`/`addAlbumReply` take an optional `parentId`. New `toggleCommentLike`/`toggleAlbumCommentLike` actions mirror `toggleLike`. UI only allows replying to top-level comments (not to replies), enforcing one level of nesting. Push notifications: replying to a comment notifies that comment's author (not just the post owner); liking a comment notifies the comment's author. No self-notifications, and a commenter is only notified once even if they're both the parent-comment author and the post owner.
 - [x] **M23 — Daily streaks, leaderboard, and Shabbos Mode**: New `streaks` table (user_id PK, current_streak, longest_streak, last_post_date, updated_at) caches per-user streak data; new `scheduled_posts` table (id, user_id, song_id, target_date, caption, status, published_at; UNIQUE user_id+target_date) powers Shabbos Mode. Streak computation: pure `computeStreak()` in `lib/streaks.ts` runs gap-and-islands over distinct Eastern calendar dates from post history — all day boundaries in `America/Toronto`. Recomputed from scratch on every post write via `recomputeUserStreak()` in `lib/streaks.server.ts` (self-healing). 12 Vitest tests cover DST crossovers, deduplication, multi-gap histories. Leaderboard at `/leaderboard`: two parallel DB queries (top-50 by current streak + top-50 by longest streak) merged so all-time leaders never fall off the All-Time Best tab; client-side tab toggle with medal display; own row highlighted; added to desktop nav and mobile bottom nav (4 items: Home, Leaderboard, Search, Shabbos). Shabbos Mode at `/shabbos`: queue a song on Friday to auto-post at noon Eastern on Saturday; INSERT + conditional UPDATE (neq published) prevents TOCTOU overwrite; cancel checks row count and errors on 0 rows. Cron at `/api/cron/shabbos-publish` runs Saturday at 0 16 * * 6 (noon EDT) and 0 17 * * 6 (noon EST) — two entries cover DST; idempotent (skips if user already posted, marks status=cancelled; publishes and marks status=published only when it creates the post); error-checked status updates. Friday banner on feed page surfaces Shabbos scheduling in context. No new env vars needed (uses existing CRON_SECRET).
 
 ## Production notes
