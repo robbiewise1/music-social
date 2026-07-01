@@ -17,20 +17,23 @@ export async function togglePutOn(
   const admin = createAdminClient();
 
   if (currentlyPutOn) {
-    await admin
+    const { error } = await admin
       .from("put_ons")
       .delete()
       .eq("user_id", user.id)
       .eq("post_id", postId);
+    if (error) return { error: "Failed to remove put on." };
   } else {
-    const { data: post } = await admin
+    const { data: post, error: postError } = await admin
       .from("posts")
       .select("user_id")
       .eq("id", postId)
       .maybeSingle();
+    if (postError) return { error: "Failed to look up post." };
     if (post?.user_id === user.id) return { error: "Can't put yourself on." };
 
-    await admin.from("put_ons").insert({ user_id: user.id, post_id: postId });
+    const { error } = await admin.from("put_ons").insert({ user_id: user.id, post_id: postId });
+    if (error) return { error: "Failed to put on." };
   }
 
   revalidatePath("/leaderboard");

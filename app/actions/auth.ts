@@ -29,12 +29,13 @@ export async function signup(
     return { error: "Username: 3+ chars, letters/numbers/underscores only." };
   }
 
-  const { data: existing } = await adminClient()
+  const { data: existing, error: existingError } = await adminClient()
     .from("profiles")
     .select("id")
     .eq("username", username)
     .maybeSingle();
 
+  if (existingError) return { error: "Failed to check username. Try again." };
   if (existing) return { error: "That username is already taken." };
 
   const supabase = await createClient();

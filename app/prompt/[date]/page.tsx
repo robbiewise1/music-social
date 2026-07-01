@@ -127,7 +127,7 @@ export default async function PromptPage({
   const userPostedSotd = user ? sotdPosts.some((p) => p.user_id === user.id) : false;
   const userPostedFun = user ? funPosts.some((p) => p.user_id === user.id) : false;
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const isToday = date === today;
 
   const formatted = new Date(date + "T00:00:00").toLocaleDateString("en-US", {

@@ -7,7 +7,7 @@ export default async function ComposePage({
   searchParams: Promise<{ prompt_id?: string }>;
 }) {
   const { prompt_id } = await searchParams;
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const admin = createAdminClient();
 
   const { data: prompt } = prompt_id

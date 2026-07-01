@@ -26,17 +26,23 @@ export async function toggleLike(
   } else {
     await admin.from("likes").insert({ user_id: user.id, post_id: postId });
 
-    const [{ data: post }, { data: liker }] = await Promise.all([
-      admin.from("posts").select("user_id").eq("id", postId).maybeSingle(),
+    const [{ data: rawPost }, { data: liker }] = await Promise.all([
+      admin
+        .from("posts")
+        .select("user_id, prompt:prompts ( active_date )")
+        .eq("id", postId)
+        .maybeSingle(),
       admin.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
     ]);
+    const post = rawPost as unknown as { user_id: string; prompt: { active_date: string } | null } | null;
 
     if (post?.user_id && post.user_id !== user.id) {
       const name = liker?.display_name ?? "Someone";
+      const url = post.prompt?.active_date ? `/prompt/${post.prompt.active_date}` : "/feed";
       await sendPushToUser(post.user_id, {
         title: "Music Club",
         body: `${name} liked your song`,
-        url: "/feed",
+        url,
       });
     }
   }

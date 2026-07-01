@@ -41,12 +41,14 @@ export async function createPost(
   if (songError || !songRow) return { error: "Failed to save song." };
 
   if (promptId) {
-    const { data: existing } = await admin
+    const { data: existing, error: existingError } = await admin
       .from("posts")
       .select("id")
       .eq("user_id", user.id)
       .eq("prompt_id", promptId)
       .maybeSingle();
+
+    if (existingError) return { error: "Failed to check for existing post." };
 
     if (existing) {
       const { error: updateError } = await admin
