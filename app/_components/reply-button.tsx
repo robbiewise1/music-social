@@ -75,6 +75,7 @@ export function ReplyButton({
 }) {
   const [open, setOpen] = useState(false);
   const [replies, setReplies] = useState<Reply[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -84,12 +85,22 @@ export function ReplyButton({
   const [replySubmitting, setReplySubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!open || replies !== null) return;
+  function loadReplies() {
     fetchReplies(postId).then((result) => {
-      if (!("error" in result)) setReplies(result);
+      if ("error" in result) {
+        setLoadError(true);
+      } else {
+        setLoadError(false);
+        setReplies(result);
+      }
     });
-  }, [open, postId, replies]);
+  }
+
+  useEffect(() => {
+    if (!open || replies !== null || loadError) return;
+    loadReplies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, postId, replies, loadError]);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -200,7 +211,19 @@ export function ReplyButton({
       {open && (
         <div className="space-y-2">
           {replies === null ? (
-            <p className="text-xs text-zinc-400">Loading…</p>
+            loadError ? (
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-rose-500">Failed to load replies.</p>
+                <button
+                  onClick={loadReplies}
+                  className="text-xs text-zinc-500 underline hover:text-zinc-700 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-400">Loading…</p>
+            )
           ) : replies.length === 0 ? (
             <p className="text-xs text-zinc-400">No replies yet.</p>
           ) : (
