@@ -71,7 +71,7 @@ export default async function PromptPage({
             ? admin.from("likes").select("post_id").eq("user_id", user.id).in("post_id", allPostIds)
             : Promise.resolve({ data: [] }),
           admin.from("comments").select("post_id").in("post_id", allPostIds),
-          admin.from("put_ons").select("post_id").in("post_id", allPostIds),
+          admin.from("put_ons").select("post_id, profiles(display_name)").in("post_id", allPostIds),
           user
             ? admin.from("put_ons").select("post_id").eq("user_id", user.id).in("post_id", allPostIds)
             : Promise.resolve({ data: [] }),
@@ -96,8 +96,14 @@ export default async function PromptPage({
   }
 
   const putOnCountMap = new Map<string, number>();
-  for (const p of (allPutOns ?? []) as { post_id: string }[]) {
+  const putOnerNamesMap = new Map<string, string[]>();
+  for (const p of (allPutOns ?? []) as unknown as { post_id: string; profiles: { display_name: string } | null }[]) {
     putOnCountMap.set(p.post_id, (putOnCountMap.get(p.post_id) ?? 0) + 1);
+    if (p.profiles?.display_name) {
+      const names = putOnerNamesMap.get(p.post_id) ?? [];
+      names.push(p.profiles.display_name);
+      putOnerNamesMap.set(p.post_id, names);
+    }
   }
   const putOnSet = new Set((myPutOns ?? []).map((p) => p.post_id));
 
@@ -110,6 +116,7 @@ export default async function PromptPage({
       replyCount: replyCountMap.get(p.id) ?? 0,
       putOnCount: putOnCountMap.get(p.id) ?? 0,
       isPutOn: putOnSet.has(p.id),
+      putOners: putOnerNamesMap.get(p.id) ?? [],
       isOwnPost: user ? p.user_id === user.id : false,
     }));
   }

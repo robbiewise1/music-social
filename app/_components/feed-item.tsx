@@ -30,6 +30,7 @@ export type FeedPost = {
   replyCount?: number;
   putOnCount?: number;
   isPutOn?: boolean;
+  putOners?: string[];
   isOwnPost?: boolean;
 };
 
@@ -131,6 +132,7 @@ export function FeedItem({ post }: { post: FeedPost }) {
             postId={post.id}
             initialPutOn={post.isPutOn ?? false}
             initialCount={post.putOnCount ?? 0}
+            initialPutOners={post.putOners ?? []}
           />
         )}
       </div>

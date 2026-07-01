@@ -13,7 +13,7 @@ type PromptType = "song_of_the_day" | "daily_fun";
 
 type DaySectionData = {
   prompt: { id: string; title: string; description: string | null } | null;
-  posts: (PostWithUser & { likeCount: number; isLiked: boolean; likers: string[]; replyCount: number; putOnCount: number; isPutOn: boolean; isOwnPost: boolean })[];
+  posts: (PostWithUser & { likeCount: number; isLiked: boolean; likers: string[]; replyCount: number; putOnCount: number; isPutOn: boolean; putOners: string[]; isOwnPost: boolean })[];
   userPosted: boolean;
 };
 
@@ -110,7 +110,7 @@ async function fetchDaySection(
             ? admin.from("likes").select("post_id").eq("user_id", userId).in("post_id", postIds)
             : Promise.resolve({ data: [] }),
           admin.from("comments").select("post_id").in("post_id", postIds),
-          admin.from("put_ons").select("post_id").in("post_id", postIds),
+          admin.from("put_ons").select("post_id, profiles(display_name)").in("post_id", postIds),
           userId
             ? admin.from("put_ons").select("post_id").eq("user_id", userId).in("post_id", postIds)
             : Promise.resolve({ data: [] }),
@@ -135,8 +135,14 @@ async function fetchDaySection(
   }
 
   const putOnCountMap = new Map<string, number>();
-  for (const p of (allPutOns ?? []) as { post_id: string }[]) {
+  const putOnerNamesMap = new Map<string, string[]>();
+  for (const p of (allPutOns ?? []) as unknown as { post_id: string; profiles: { display_name: string } | null }[]) {
     putOnCountMap.set(p.post_id, (putOnCountMap.get(p.post_id) ?? 0) + 1);
+    if (p.profiles?.display_name) {
+      const names = putOnerNamesMap.get(p.post_id) ?? [];
+      names.push(p.profiles.display_name);
+      putOnerNamesMap.set(p.post_id, names);
+    }
   }
   const putOnSet = new Set((myPutOns ?? []).map((p) => p.post_id));
 
@@ -148,6 +154,7 @@ async function fetchDaySection(
     replyCount: replyCountMap.get(p.id) ?? 0,
     putOnCount: putOnCountMap.get(p.id) ?? 0,
     isPutOn: putOnSet.has(p.id),
+    putOners: putOnerNamesMap.get(p.id) ?? [],
     isOwnPost: p.user_id === userId,
   }));
 
