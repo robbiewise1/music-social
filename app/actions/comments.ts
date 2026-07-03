@@ -52,7 +52,9 @@ export async function fetchComments(target: CommentTarget): Promise<Comment[] | 
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("comments")
-    .select("id, user_id, body, created_at, edited_at, deleted_at, parent_id, profiles(display_name, username)")
+    .select(
+      "id, user_id, body, created_at, edited_at, deleted_at, parent_id, profiles!comments_user_id_fkey(display_name, username)"
+    )
     .eq(targetColumn(target.type), target.id)
     .order("created_at", { ascending: true });
 
