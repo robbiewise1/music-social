@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { type FeedPost } from "@/app/_components/feed-item";
 import { SortableFeedList } from "@/app/_components/sortable-feed-list";
+import { fetchCommentCounts } from "@/lib/comment-counts.server";
 
 const POST_SELECT = `id, caption, created_at, user_id,
   profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url ),
@@ -63,20 +64,20 @@ export default async function PromptPage({
 
   const allPostIds = [...sotdPosts, ...funPosts].map((p) => p.id);
 
-  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }, { data: allPutOns }, { data: myPutOns }] =
+  const [{ data: allLikes }, { data: myLikes }, replyCountMap, { data: allPutOns }, { data: myPutOns }] =
     allPostIds.length > 0
       ? await Promise.all([
           admin.from("likes").select("post_id, profiles(display_name)").in("post_id", allPostIds),
           user
             ? admin.from("likes").select("post_id").eq("user_id", user.id).in("post_id", allPostIds)
             : Promise.resolve({ data: [] }),
-          admin.from("comments").select("post_id").in("post_id", allPostIds),
+          fetchCommentCounts("post", allPostIds),
           admin.from("put_ons").select("post_id, profiles(display_name)").in("post_id", allPostIds),
           user
             ? admin.from("put_ons").select("post_id").eq("user_id", user.id).in("post_id", allPostIds)
             : Promise.resolve({ data: [] }),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, new Map<string, number>(), { data: [] }, { data: [] }];
 
   const likeCountMap = new Map<string, number>();
   const likerNamesMap = new Map<string, string[]>();
@@ -89,11 +90,6 @@ export default async function PromptPage({
     }
   }
   const likedSet = new Set((myLikes ?? []).map((l) => l.post_id));
-
-  const replyCountMap = new Map<string, number>();
-  for (const c of (allReplies ?? []) as { post_id: string }[]) {
-    replyCountMap.set(c.post_id, (replyCountMap.get(c.post_id) ?? 0) + 1);
-  }
 
   const putOnCountMap = new Map<string, number>();
   const putOnerNamesMap = new Map<string, string[]>();
@@ -118,6 +114,7 @@ export default async function PromptPage({
       isPutOn: putOnSet.has(p.id),
       putOners: putOnerNamesMap.get(p.id) ?? [],
       isOwnPost: user ? p.user_id === user.id : false,
+      currentUserId: user?.id ?? null,
     }));
   }
 

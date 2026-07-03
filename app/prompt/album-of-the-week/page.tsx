@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { type AlbumFeedPost } from "@/app/_components/album-feed-item";
 import { SortableAlbumFeedList } from "@/app/_components/sortable-album-feed-list";
+import { fetchCommentCounts } from "@/lib/comment-counts.server";
 
 const ALBUM_POST_SELECT = `id, caption, created_at, user_id,
   profiles:profiles!album_posts_user_id_fkey ( username, display_name, avatar_url ),
@@ -62,16 +63,16 @@ async function fetchWeekSection(
   const posts = (rawPosts ?? []) as unknown as AlbumPostWithUser[];
   const postIds = posts.map((p) => p.id);
 
-  const [{ data: allLikes }, { data: myLikes }, { data: allReplies }] =
+  const [{ data: allLikes }, { data: myLikes }, replyCountMap] =
     postIds.length > 0
       ? await Promise.all([
           admin.from("album_post_likes").select("album_post_id, profiles(display_name)").in("album_post_id", postIds),
           userId
             ? admin.from("album_post_likes").select("album_post_id").eq("user_id", userId).in("album_post_id", postIds)
             : Promise.resolve({ data: [] }),
-          admin.from("album_post_comments").select("album_post_id").in("album_post_id", postIds),
+          fetchCommentCounts("album_post", postIds),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, new Map<string, number>()];
 
   const likeCountMap = new Map<string, number>();
   const likerNamesMap = new Map<string, string[]>();
@@ -84,10 +85,6 @@ async function fetchWeekSection(
     }
   }
   const likedSet = new Set((myLikes ?? []).map((l) => (l as { album_post_id: string }).album_post_id));
-  const replyCountMap = new Map<string, number>();
-  for (const c of (allReplies ?? []) as { album_post_id: string }[]) {
-    replyCountMap.set(c.album_post_id, (replyCountMap.get(c.album_post_id) ?? 0) + 1);
-  }
 
   const postsWithLikes = posts.map((p) => ({
     ...p,
@@ -95,6 +92,7 @@ async function fetchWeekSection(
     isLiked: likedSet.has(p.id),
     likers: likerNamesMap.get(p.id) ?? [],
     replyCount: replyCountMap.get(p.id) ?? 0,
+    currentUserId: userId ?? null,
   }));
 
   const userPosted = userId ? posts.some((p) => p.user_id === userId) : false;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AlbumLikeButton } from "./album-like-button";
-import { AlbumReplyButton } from "./album-reply-button";
+import { CommentThread } from "./comment-thread";
 
 export type AlbumFeedPost = {
   id: string;
@@ -23,6 +23,7 @@ export type AlbumFeedPost = {
   isLiked: boolean;
   likers: string[];
   replyCount: number;
+  currentUserId?: string | null;
 };
 
 function formatDate(dateStr: string): string {
@@ -105,7 +106,11 @@ export function AlbumFeedItem({ post }: { post: AlbumFeedPost }) {
           initialCount={post.likeCount}
           initialLikers={post.likers}
         />
-        <AlbumReplyButton albumPostId={post.id} initialCount={post.replyCount} />
+        <CommentThread
+          target={{ type: "album_post", id: post.id }}
+          initialCount={post.replyCount}
+          currentUserId={post.currentUserId ?? null}
+        />
       </div>
     </article>
   );
