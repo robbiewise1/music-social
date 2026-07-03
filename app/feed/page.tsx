@@ -26,11 +26,14 @@ export default async function FeedPage() {
   const thisWeek = getThisWeekMonday();
   const admin = createAdminClient();
 
-  const [{ data: sotd }, { data: funPrompt }, { data: albumPrompt }] = await Promise.all([
+  const [{ data: sotd }, { data: funPrompt }, { data: albumPrompt }, { data: streak }] = await Promise.all([
     admin.from("prompts").select("id, title, description").eq("active_date", today).eq("prompt_type", "song_of_the_day").maybeSingle(),
     admin.from("prompts").select("id, title, description").eq("active_date", today).eq("prompt_type", "daily_fun").maybeSingle(),
     admin.from("prompts").select("id, title, description").eq("active_date", thisWeek).eq("prompt_type", "album_of_the_week").maybeSingle(),
+    admin.from("streaks").select("current_streak").eq("user_id", user.id).maybeSingle(),
   ]);
+
+  const currentStreak = streak?.current_streak ?? 0;
 
   const [sotdCountRes, funCountRes, albumCountRes] = await Promise.all([
     sotd
@@ -74,7 +77,9 @@ export default async function FeedPage() {
         Today&apos;s prompts
       </h1>
       <p className="text-xs text-zinc-400 text-center mb-10">
-        Post a song today to add to your streak!
+        {currentStreak > 0
+          ? `🔥 ${currentStreak} day streak — post today to keep it alive!`
+          : "Post a song today to start your streak!"}
       </p>
 
       {isFriday && (

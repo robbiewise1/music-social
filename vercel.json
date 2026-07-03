@@ -9,6 +9,10 @@
       "schedule": "0 5 * * 1"
     },
     {
+      "path": "/api/cron/reset-streaks",
+      "schedule": "10 6 * * *"
+    },
+    {
       "path": "/api/cron/shabbos-publish",
       "schedule": "0 16 * * 6"
     },
