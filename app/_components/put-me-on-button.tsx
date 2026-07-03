@@ -10,16 +10,38 @@ function formatPutOners(putOners: string[]): string {
   return `${putOners[0]}, ${putOners[1]} and ${putOners.length - 2} others`;
 }
 
+function BulbIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+      <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
+    </svg>
+  );
+}
+
 export function PutMeOnButton({
   postId,
   initialPutOn,
   initialCount,
   initialPutOners = [],
+  readOnly = false,
 }: {
   postId: string;
   initialPutOn: boolean;
   initialCount: number;
   initialPutOners?: string[];
+  readOnly?: boolean;
 }) {
   const [putOn, setPutOn] = useState(initialPutOn);
   const [count, setCount] = useState(initialCount);
@@ -55,6 +77,29 @@ export function PutMeOnButton({
     }
   }
 
+  if (readOnly) {
+    return (
+      <div ref={containerRef} className="inline-flex flex-col gap-1">
+        <div className="flex items-center gap-1.5 text-zinc-400">
+          <BulbIcon />
+          <span className="text-xs">New to me</span>
+          {count > 0 && (
+            <button
+              onClick={() => setShowPutOners((v) => !v)}
+              className="text-xs underline hover:text-zinc-600 transition-colors"
+              aria-label="Show who was put on"
+            >
+              {count}
+            </button>
+          )}
+        </div>
+        {showPutOners && initialPutOners.length > 0 && (
+          <p className="text-xs text-zinc-500">{formatPutOners(initialPutOners)}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="inline-flex flex-col gap-1">
       <div className="flex items-center gap-1.5">
@@ -67,21 +112,7 @@ export function PutMeOnButton({
               : "text-zinc-400 hover:text-violet-400"
           }`}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 18h6" />
-            <path d="M10 22h4" />
-            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
-          </svg>
+          <BulbIcon />
           <span className="text-xs">New to me</span>
         </button>
         {count > 0 && (

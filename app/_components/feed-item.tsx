@@ -132,14 +132,13 @@ export function FeedItem({ post }: { post: FeedPost }) {
           initialCount={post.replyCount ?? 0}
           currentUserId={post.currentUserId ?? null}
         />
-        {!post.isOwnPost && (
-          <PutMeOnButton
-            postId={post.id}
-            initialPutOn={post.isPutOn ?? false}
-            initialCount={post.putOnCount ?? 0}
-            initialPutOners={post.putOners ?? []}
-          />
-        )}
+        <PutMeOnButton
+          postId={post.id}
+          initialPutOn={post.isPutOn ?? false}
+          initialCount={post.putOnCount ?? 0}
+          initialPutOners={post.putOners ?? []}
+          readOnly={post.isOwnPost ?? false}
+        />
       </div>
     </article>
   );
