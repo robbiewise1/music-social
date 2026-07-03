@@ -57,8 +57,9 @@ export default async function ShabbosPage() {
     <main className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-bold text-zinc-900 mb-2">Shabbos Mode</h1>
       <p className="text-sm text-zinc-400 mb-8">
-        Pick a song on Friday and we&apos;ll post it at noon Eastern on
-        Saturday — so your streak stays alive while you&apos;re offline.
+        Pick a song on Friday and we&apos;ll post it to the Song of the Day
+        feed at noon Eastern on Saturday — so your streak stays alive while
+        you&apos;re offline.
       </p>
 
       {alreadyPublished ? (
