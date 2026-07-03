@@ -221,7 +221,7 @@ export function CommentThread({
 }) {
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<Comment[] | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [count, setCount] = useState(initialCount);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -239,15 +239,17 @@ export function CommentThread({
   const inputRef = useRef<HTMLInputElement>(null);
 
   function loadComments() {
-    fetchComments(target).then((result) => {
-      if ("error" in result) {
-        setLoadError(true);
-      } else {
-        setLoadError(false);
-        setComments(result);
-        setCount(result.filter((c) => !c.deleted_at).length);
-      }
-    });
+    fetchComments(target)
+      .then((result) => {
+        if ("error" in result) {
+          setLoadError(result.error);
+        } else {
+          setLoadError(null);
+          setComments(result);
+          setCount(result.filter((c) => !c.deleted_at).length);
+        }
+      })
+      .catch((err) => setLoadError(err instanceof Error ? err.message : String(err)));
   }
 
   useEffect(() => {
@@ -411,7 +413,7 @@ export function CommentThread({
           {comments === null ? (
             loadError ? (
               <div className="flex items-center gap-2">
-                <p className="text-xs text-rose-500">Failed to load comments.</p>
+                <p className="text-xs text-rose-500">Failed to load comments: {loadError}</p>
                 <button
                   onClick={loadComments}
                   className="text-xs text-zinc-500 underline hover:text-zinc-700 transition-colors"
