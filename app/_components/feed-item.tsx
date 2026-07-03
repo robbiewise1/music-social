@@ -117,7 +117,7 @@ export function FeedItem({ post }: { post: FeedPost }) {
       )}
 
       {post.caption && (
-        <p className="mt-3 text-sm text-zinc-700">{post.caption}</p>
+        <p className="mt-3 whitespace-pre-line text-sm text-zinc-700">{post.caption}</p>
       )}
 
       <div className="mt-3 pt-3 border-t border-zinc-50 flex items-start gap-5">

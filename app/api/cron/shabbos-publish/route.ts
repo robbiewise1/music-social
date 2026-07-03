@@ -29,33 +29,65 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ published: 0, skipped: 0 });
   }
 
+  // Attach auto-published posts to today's Song of the Day prompt, if it's
+  // been seeded. Unlike Album of the Week, there's no daily auto-seed cron
+  // for song_of_the_day yet, so this can legitimately be missing — fall back
+  // to an unattached post (old behavior) rather than skip publishing, since
+  // keeping the user's streak alive is the whole point of Shabbos Mode.
+  const { data: sotdPrompt, error: promptError } = await admin
+    .from("prompts")
+    .select("id")
+    .eq("active_date", today)
+    .eq("prompt_type", "song_of_the_day")
+    .maybeSingle();
+
+  if (promptError) {
+    console.error("[shabbos-publish] Failed to fetch today's Song of the Day prompt:", promptError.message);
+  }
+
   let published = 0;
   let skipped = 0;
 
   await Promise.all(
     pending.map(async (item) => {
-      // Check if the user already has any post for today (Eastern) — 30h window
-      // covers the full Eastern day regardless of DST; JS date filter is authoritative.
-      const since = new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString();
-      const { data: recentPosts } = await admin
-        .from("posts")
-        .select("created_at")
-        .eq("user_id", item.user_id)
-        .gte("created_at", since);
+      let hasPostToday: boolean;
 
-      const hasPostToday = (recentPosts ?? []).some(
-        (p) =>
-          new Date(p.created_at).toLocaleDateString("en-CA", {
-            timeZone: "America/Toronto",
-          }) === today
-      );
+      if (sotdPrompt) {
+        const { data: existingSotdPost } = await admin
+          .from("posts")
+          .select("id")
+          .eq("user_id", item.user_id)
+          .eq("prompt_id", sotdPrompt.id)
+          .maybeSingle();
+        hasPostToday = !!existingSotdPost;
+      } else {
+        // No Song of the Day prompt for today — fall back to "posted
+        // anything today" (30h window covers the full Eastern day regardless
+        // of DST; JS date filter is authoritative) so we don't double-post.
+        const since = new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString();
+        const { data: recentPosts } = await admin
+          .from("posts")
+          .select("created_at")
+          .eq("user_id", item.user_id)
+          .gte("created_at", since);
+
+        hasPostToday = (recentPosts ?? []).some(
+          (p) =>
+            new Date(p.created_at).toLocaleDateString("en-CA", {
+              timeZone: "America/Toronto",
+            }) === today
+        );
+      }
 
       if (!hasPostToday) {
+        const note = "*Automated with Shabbos Mode";
+        const caption = item.caption ? `${item.caption}\n\n${note}` : note;
+
         const { error: insertError } = await admin.from("posts").insert({
           user_id: item.user_id,
           song_id: item.song_id,
-          caption: item.caption,
-          prompt_id: null,
+          caption,
+          prompt_id: sotdPrompt?.id ?? null,
         });
 
         if (insertError) {
