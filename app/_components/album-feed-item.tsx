@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { AlbumLikeButton } from "./album-like-button";
 import { CommentThread } from "./comment-thread";
 
@@ -61,7 +60,8 @@ export function AlbumFeedItem({ post }: { post: AlbumFeedPost }) {
           className="flex items-center gap-3 rounded-lg bg-zinc-50 p-3 hover:bg-zinc-100 transition-colors group"
         >
           {album.album_art_url ? (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={album.album_art_url}
               alt={album.title}
               width={56}

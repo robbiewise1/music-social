@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { SongResult } from "@/app/api/spotify/search/route";
 
 type Props = {
@@ -17,7 +16,8 @@ export function SongCard({ song, onClick, selected }: Props) {
       } ${selected ? "bg-zinc-100 ring-1 ring-inset ring-zinc-300" : ""}`}
     >
       {song.album_art_url ? (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={song.album_art_url}
           alt={song.album}
           width={48}

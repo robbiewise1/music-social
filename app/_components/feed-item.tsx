@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { LikeButton } from "./like-button";
 import { CommentThread } from "./comment-thread";
@@ -80,7 +79,8 @@ export function FeedItem({ post }: { post: FeedPost }) {
           className="flex items-center gap-3 rounded-lg bg-zinc-50 p-3 hover:bg-zinc-100 transition-colors group"
         >
           {song.album_art_url ? (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={song.album_art_url}
               alt={song.album}
               width={56}
