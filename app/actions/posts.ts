@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import type { SongResult } from "@/app/api/spotify/search/route";
 import { recomputeUserStreak } from "@/lib/streaks.server";
+import { recomputeUserGenre } from "@/lib/genre.server";
 
 export async function createPost(
   song: SongResult,
@@ -32,6 +33,7 @@ export async function createPost(
         album_art_url: song.album_art_url,
         spotify_url: song.track_url,
         preview_url: song.preview_url,
+        genre: song.genre,
       },
       { onConflict: "spotify_id", ignoreDuplicates: false }
     )
@@ -70,6 +72,7 @@ export async function createPost(
   }
 
   await recomputeUserStreak(user.id);
+  await recomputeUserGenre(user.id);
 
   if (promptType === "song_of_the_day") redirect("/prompt/song-of-the-day");
   if (promptType === "daily_fun") redirect("/prompt/daily-fun");

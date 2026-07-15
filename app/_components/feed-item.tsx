@@ -2,6 +2,8 @@ import Link from "next/link";
 import { LikeButton } from "./like-button";
 import { CommentThread } from "./comment-thread";
 import { PutMeOnButton } from "./put-me-on-button";
+import { GENRE_ICONS } from "./music-icons";
+import { GENRE_CATEGORY_LABELS, type GenreCategory } from "@/lib/genre-map";
 
 export type FeedPost = {
   id: string;
@@ -11,6 +13,7 @@ export type FeedPost = {
     username: string;
     display_name: string;
     avatar_url: string | null;
+    top_genre?: GenreCategory | null;
   } | null;
   songs: {
     title: string;
@@ -44,6 +47,7 @@ function formatDate(dateStr: string): string {
 
 export function FeedItem({ post }: { post: FeedPost }) {
   const { profiles: profile, songs: song } = post;
+  const GenreIcon = profile?.top_genre ? GENRE_ICONS[profile.top_genre] : null;
 
   return (
     <article className="rounded-xl border border-[var(--color-accent)]/12 bg-[var(--color-surface)] p-4 shadow-sm">
@@ -56,6 +60,11 @@ export function FeedItem({ post }: { post: FeedPost }) {
           <span className="text-sm font-medium text-[var(--color-text)]">
             {profile?.display_name ?? profile?.username ?? "Unknown"}
           </span>
+          {GenreIcon && profile?.top_genre && (
+            <span title={GENRE_CATEGORY_LABELS[profile.top_genre]}>
+              <GenreIcon className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+            </span>
+          )}
           <span className="text-xs text-[var(--color-text-muted)]">@{profile?.username}</span>
         </Link>
         <span className="text-xs text-[var(--color-text-muted)]">{formatDate(post.created_at)}</span>

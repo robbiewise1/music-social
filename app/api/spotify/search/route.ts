@@ -8,6 +8,7 @@ export type SongResult = {
   album_art_url: string | null;
   track_url: string;
   preview_url: string | null;
+  genre: string | null;
 };
 
 export async function GET(request: NextRequest) {
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
       : null,
     track_url: track.trackViewUrl,
     preview_url: track.previewUrl ?? null,
+    genre: track.primaryGenreName ?? null,
   }));
 
   // Sort to prioritize songs whose title matches the query closely

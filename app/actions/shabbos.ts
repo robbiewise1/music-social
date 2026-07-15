@@ -29,6 +29,7 @@ export async function scheduleShabbosPost(
         album_art_url: song.album_art_url,
         spotify_url: song.track_url,
         preview_url: song.preview_url,
+        genre: song.genre,
       },
       { onConflict: "spotify_id", ignoreDuplicates: false }
     )

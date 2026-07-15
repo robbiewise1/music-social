@@ -24,7 +24,7 @@ export default async function ShabbosPage() {
   const { data: rows } = await supabase
     .from("scheduled_posts")
     .select(
-      "target_date, caption, status, songs(spotify_id, title, artist, album, album_art_url, spotify_url, preview_url)"
+      "target_date, caption, status, songs(spotify_id, title, artist, album, album_art_url, spotify_url, preview_url, genre)"
     )
     .eq("user_id", user.id)
     .in("target_date", datesToQuery);
@@ -48,6 +48,7 @@ export default async function ShabbosPage() {
       album_art_url: s.album_art_url ?? null,
       track_url: s.spotify_url ?? "",
       preview_url: s.preview_url ?? null,
+      genre: s.genre ?? null,
     };
   }
 
