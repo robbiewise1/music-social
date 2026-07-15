@@ -1,27 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf8fc;
-  --foreground: #1c1522;
+  /* Dark theme is the only theme — forced regardless of system preference. */
+  color-scheme: dark;
+  --background: #16111d;
+  --foreground: #f1eaf7;
 
   /* Brand palette — "social record club" */
-  --color-primary: #6d28d9;       /* deep violet / plum */
-  --color-primary-hover: #5b21b6;
-  --color-secondary: #ea580c;     /* warm coral / orange */
-  --color-secondary-hover: #c2410c;
-  --color-accent: #c084fc;        /* electric lavender */
-  --color-surface: #ffffff;
-  --color-surface-tint: #f4effa;  /* lavender-tinted panel */
-  --color-text: #1c1522;
-  --color-text-muted: #6f6577;
+  --color-primary: #a78bfa;       /* deep violet / plum */
+  --color-primary-hover: #c4b5fd;
+  --color-secondary: #fb923c;     /* warm coral / orange */
+  --color-secondary-hover: #fdba74;
+  --color-accent: #d8b4fe;        /* electric lavender */
+  --color-surface: #1f1829;
+  --color-surface-tint: #241b30;  /* lavender-tinted panel */
+  --color-text: #f1eaf7;
+  --color-text-muted: #a99fb0;
 
   /* Prompt category accents */
   --color-song: var(--color-primary);
   --color-fun: var(--color-secondary);
-  --color-album: #0d9488;         /* teal */
+  --color-album: #2dd4bf;         /* teal */
 
-  --shadow-soft: 0 1px 2px rgba(28, 21, 34, 0.04), 0 4px 16px rgba(76, 29, 149, 0.06);
-  --shadow-soft-hover: 0 2px 4px rgba(28, 21, 34, 0.06), 0 10px 28px rgba(76, 29, 149, 0.12);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-soft-hover: 0 2px 4px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.35);
 }
 
 @theme inline {
@@ -41,27 +43,6 @@
   --color-album: var(--color-album);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #16111d;
-    --foreground: #f1eaf7;
-    --color-primary: #a78bfa;
-    --color-primary-hover: #c4b5fd;
-    --color-secondary: #fb923c;
-    --color-secondary-hover: #fdba74;
-    --color-accent: #d8b4fe;
-    --color-surface: #1f1829;
-    --color-surface-tint: #241b30;
-    --color-text: #f1eaf7;
-    --color-text-muted: #a99fb0;
-    --color-song: var(--color-primary);
-    --color-fun: var(--color-secondary);
-    --color-album: #2dd4bf;
-    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.25);
-    --shadow-soft-hover: 0 2px 4px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.35);
-  }
 }
 
 body {
