@@ -23,8 +23,8 @@ export function SortableAlbumFeedList({ posts }: { posts: AlbumFeedPost[] }) {
               onClick={() => setSort(mode)}
               className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
                 sort === mode
-                  ? "bg-zinc-900 text-white"
-                  : "border border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                  ? "bg-[var(--color-primary)] text-white"
+                  : "border border-[var(--color-accent)]/18 text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/40"
               }`}
             >
               {mode === "recent" ? "Recent" : "Most Liked"}

@@ -75,12 +75,12 @@ export default async function ProfilePage({
     <main className="w-full mx-auto max-w-2xl px-4 py-10">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-zinc-200 shrink-0" />
+          <div className="h-16 w-16 rounded-full bg-[var(--color-accent)]/20 shrink-0" />
           <div>
-            <h1 className="text-xl font-bold text-zinc-900">
+            <h1 className="text-xl font-bold text-[var(--color-text)]">
               {profile.display_name}
             </h1>
-            <p className="text-sm text-zinc-400">@{profile.username}</p>
+            <p className="text-sm text-[var(--color-text-muted)]">@{profile.username}</p>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default async function ProfilePage({
       )}
 
       {postsWithLikes.length === 0 ? (
-        <p className="py-16 text-center text-sm text-zinc-400">No posts yet.</p>
+        <p className="py-16 text-center text-sm text-[var(--color-text-muted)]">No posts yet.</p>
       ) : (
         <div className="space-y-4">
           {postsWithLikes.map((post) => (

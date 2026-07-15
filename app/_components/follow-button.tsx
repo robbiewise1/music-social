@@ -29,8 +29,8 @@ export function FollowButton({ userId, initialFollowing }: Props) {
       disabled={loading}
       className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
         following
-          ? "border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
-          : "bg-zinc-900 text-white hover:bg-zinc-700"
+          ? "border border-[var(--color-accent)]/18 text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)]"
+          : "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]"
       }`}
     >
       {following ? "Following" : "Follow"}

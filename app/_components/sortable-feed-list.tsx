@@ -21,8 +21,8 @@ export function SortableFeedList({ posts }: { posts: FeedPost[] }) {
             onClick={() => setSort("recent")}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
               sort === "recent"
-                ? "bg-zinc-900 text-white"
-                : "border border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:text-zinc-900"
+                ? "bg-[var(--color-primary)] text-white"
+                : "border border-[var(--color-accent)]/18 text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
             }`}
           >
             Recent
@@ -31,8 +31,8 @@ export function SortableFeedList({ posts }: { posts: FeedPost[] }) {
             onClick={() => setSort("likes")}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
               sort === "likes"
-                ? "bg-zinc-900 text-white"
-                : "border border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:text-zinc-900"
+                ? "bg-[var(--color-primary)] text-white"
+                : "border border-[var(--color-accent)]/18 text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
             }`}
           >
             Most Liked

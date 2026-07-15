@@ -80,13 +80,13 @@ export function PutMeOnButton({
   if (readOnly) {
     return (
       <div ref={containerRef} className="inline-flex flex-col gap-1">
-        <div className="flex items-center gap-1.5 text-zinc-400">
+        <div className="flex items-center gap-1.5 text-[var(--color-text-muted)]">
           <BulbIcon />
           <span className="text-xs">New to me</span>
           {count > 0 && (
             <button
               onClick={() => setShowPutOners((v) => !v)}
-              className="text-xs underline hover:text-zinc-600 transition-colors"
+              className="text-xs underline hover:text-[var(--color-primary)] transition-colors"
               aria-label="Show who was put on"
             >
               {count}
@@ -94,7 +94,7 @@ export function PutMeOnButton({
           )}
         </div>
         {showPutOners && initialPutOners.length > 0 && (
-          <p className="text-xs text-zinc-500">{formatPutOners(initialPutOners)}</p>
+          <p className="text-xs text-[var(--color-text-muted)]">{formatPutOners(initialPutOners)}</p>
         )}
       </div>
     );
@@ -109,7 +109,7 @@ export function PutMeOnButton({
           className={`flex items-center gap-1.5 transition-colors ${
             putOn
               ? "text-violet-500 hover:text-violet-400"
-              : "text-zinc-400 hover:text-violet-400"
+              : "text-[var(--color-text-muted)] hover:text-violet-400"
           }`}
         >
           <BulbIcon />
@@ -118,7 +118,7 @@ export function PutMeOnButton({
         {count > 0 && (
           <button
             onClick={() => initialPutOners.length > 0 && setShowPutOners((v) => !v)}
-            className="text-xs text-zinc-400 underline hover:text-zinc-600 transition-colors"
+            className="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-primary)] transition-colors"
             aria-label="Show who was put on"
           >
             {count}
@@ -126,7 +126,7 @@ export function PutMeOnButton({
         )}
       </div>
       {showPutOners && initialPutOners.length > 0 && (
-        <p className="text-xs text-zinc-500">{formatPutOners(initialPutOners)}</p>
+        <p className="text-xs text-[var(--color-text-muted)]">{formatPutOners(initialPutOners)}</p>
       )}
     </div>
   );

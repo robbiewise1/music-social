@@ -15,8 +15,8 @@ export function AlbumCard({
       onClick={onSelect}
       className={`w-full flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
         selected
-          ? "border-zinc-900 bg-zinc-50"
-          : "border-zinc-200 hover:border-zinc-400"
+          ? "border-[var(--color-primary)] bg-[var(--color-surface-tint)]"
+          : "border-[var(--color-accent)]/18 hover:border-[var(--color-primary)]/40"
       }`}
     >
       {album.album_art_url ? (
@@ -29,11 +29,11 @@ export function AlbumCard({
           className="rounded-md object-cover flex-shrink-0 w-12 h-12"
         />
       ) : (
-        <div className="w-12 h-12 rounded-md bg-zinc-200 flex-shrink-0" />
+        <div className="w-12 h-12 rounded-md bg-[var(--color-accent)]/20 flex-shrink-0" />
       )}
       <div className="min-w-0">
-        <p className="text-sm font-medium text-zinc-900 truncate">{album.title}</p>
-        <p className="text-xs text-zinc-500 truncate">{album.artist}</p>
+        <p className="text-sm font-medium text-[var(--color-text)] truncate">{album.title}</p>
+        <p className="text-xs text-[var(--color-text-muted)] truncate">{album.artist}</p>
       </div>
     </button>
   );

@@ -46,7 +46,7 @@ export function AlbumSearchInput({
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-zinc-700">
+      <label className="block text-sm font-medium text-[var(--color-text)]">
         Search for an album
       </label>
       <input
@@ -54,9 +54,9 @@ export function AlbumSearchInput({
         value={query}
         onChange={handleChange}
         placeholder="Album name..."
-        className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+        className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
       />
-      {loading && <p className="text-xs text-zinc-400">Searching...</p>}
+      {loading && <p className="text-xs text-[var(--color-text-muted)]">Searching...</p>}
       {results.length > 0 && !selectedAlbum && (
         <div className="space-y-1.5">
           {results.map((album) => (

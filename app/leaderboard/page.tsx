@@ -127,8 +127,8 @@ export default async function LeaderboardPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-zinc-900 mb-2">Leaderboard</h1>
-      <p className="text-sm text-zinc-400 mb-8">
+      <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">Leaderboard</h1>
+      <p className="text-sm text-[var(--color-text-muted)] mb-8">
         Who&apos;s been posting every day?
       </p>
       <LeaderboardTabs

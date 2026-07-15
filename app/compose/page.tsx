@@ -25,7 +25,7 @@ export default async function ComposePage({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-zinc-900 mb-8">New post</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-text)] mb-8">New post</h1>
       <ComposeForm todayPrompt={prompt ?? null} />
     </main>
   );

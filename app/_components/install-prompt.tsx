@@ -76,20 +76,20 @@ export function InstallPrompt() {
 
   if (platform === "ios") {
     return (
-      <div className="mb-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+      <div className="mb-6 rounded-2xl border border-[var(--color-accent)]/18 bg-[var(--color-surface-tint)] p-4">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-semibold text-zinc-800">
+          <p className="text-sm font-semibold text-[var(--color-text)]">
             Add Music Club to your Home Screen
           </p>
           <button
             onClick={dismiss}
             aria-label="Dismiss"
-            className="text-zinc-400 hover:text-zinc-600 transition-colors leading-none mt-0.5 flex-shrink-0"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors leading-none mt-0.5 flex-shrink-0"
           >
             ✕
           </button>
         </div>
-        <p className="mt-2 text-xs text-zinc-500">Tap these 4 buttons in order:</p>
+        <p className="mt-2 text-xs text-[var(--color-text-muted)]">Tap these 4 buttons in order:</p>
         <div className="mt-3 flex items-center gap-2 flex-wrap">
           <Chip>
             <DotsIcon />
@@ -110,26 +110,26 @@ export function InstallPrompt() {
             <span>Add</span>
           </Chip>
         </div>
-        <p className="mt-3 text-xs text-zinc-400">
-          The <span className="font-medium text-zinc-500">···</span> button is at the bottom of Safari, next to the address bar.
+        <p className="mt-3 text-xs text-[var(--color-text-muted)]">
+          The <span className="font-medium text-[var(--color-text-muted)]">···</span> button is at the bottom of Safari, next to the address bar.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="mb-6 flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-      <p className="text-sm text-zinc-600">Add Music Club to your Home Screen</p>
+    <div className="mb-6 flex items-center justify-between rounded-xl border border-[var(--color-accent)]/18 bg-[var(--color-surface-tint)] px-4 py-3">
+      <p className="text-sm text-[var(--color-text-muted)]">Add Music Club to your Home Screen</p>
       <div className="flex items-center gap-3">
         <button
           onClick={dismiss}
-          className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
         >
           Not now
         </button>
         <button
           onClick={install}
-          className="rounded-full bg-zinc-900 px-3 py-1 text-xs font-medium text-white hover:bg-zinc-700 transition-colors"
+          className="rounded-full bg-[var(--color-primary)] px-3 py-1 text-xs font-medium text-white hover:bg-[var(--color-primary-hover)] transition-colors"
         >
           Add
         </button>
@@ -140,20 +140,20 @@ export function InstallPrompt() {
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-700 shadow-sm">
+    <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-accent)]/25 bg-[var(--color-surface)] px-2 py-1 text-xs font-medium text-[var(--color-text)] shadow-sm">
       {children}
     </span>
   );
 }
 
 function Arrow() {
-  return <span className="text-zinc-400 text-xs">→</span>;
+  return <span className="text-[var(--color-text-muted)] text-xs">→</span>;
 }
 
 function DotsIcon() {
   return (
     <svg
-      className="inline-block w-3 h-3 text-zinc-500"
+      className="inline-block w-3 h-3 text-[var(--color-text-muted)]"
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-hidden
@@ -168,7 +168,7 @@ function DotsIcon() {
 function PlusIcon() {
   return (
     <svg
-      className="inline-block w-3 h-3 text-zinc-500"
+      className="inline-block w-3 h-3 text-[var(--color-text-muted)]"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

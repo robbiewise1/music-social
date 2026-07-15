@@ -133,28 +133,28 @@ export default async function PromptPage({
   return (
     <main className="w-full mx-auto max-w-2xl px-4 py-10">
       <div className="flex items-center gap-3 mb-8">
-        <Link href="/feed" className="text-xs text-zinc-400 hover:text-zinc-700 transition-colors">
+        <Link href="/feed" className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
           ← Home
         </Link>
-        <p className="text-xs text-zinc-400">{formatted}</p>
+        <p className="text-xs text-[var(--color-text-muted)]">{formatted}</p>
       </div>
 
       {sotd && (
         <section className="mb-12">
-          <h1 className="text-2xl font-bold text-zinc-900 mb-1">Song of the Day</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text)] mb-1">Song of the Day</h1>
           {sotd.description && (
-            <p className="text-sm text-zinc-500 mb-6">{sotd.description}</p>
+            <p className="text-sm text-[var(--color-text-muted)] mb-6">{sotd.description}</p>
           )}
           {isToday && (
             <Link
               href={`/compose?prompt_id=${sotd.id}`}
-              className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+              className="inline-block mb-8 rounded-full bg-[var(--color-primary)] px-5 py-2 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               {userPostedSotd ? "Change your song" : "+ Post your song"}
             </Link>
           )}
           {sotdWithLikes.length === 0 ? (
-            <p className="py-12 text-center text-sm text-zinc-400">
+            <p className="py-12 text-center text-sm text-[var(--color-text-muted)]">
               No songs yet — be the first!
             </p>
           ) : (
@@ -165,22 +165,22 @@ export default async function PromptPage({
 
       {funPrompt && (
         <>
-          {sotd && <hr className="border-zinc-100 mb-12" />}
+          {sotd && <hr className="border-[var(--color-accent)]/12 mb-12" />}
           <section>
-            <h2 className="text-2xl font-bold text-zinc-900 mb-2">{funPrompt.title}</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">{funPrompt.title}</h2>
             {funPrompt.description && (
-              <p className="text-sm text-zinc-500 mb-6">{funPrompt.description}</p>
+              <p className="text-sm text-[var(--color-text-muted)] mb-6">{funPrompt.description}</p>
             )}
             {isToday && (
               <Link
                 href={`/compose?prompt_id=${funPrompt.id}`}
-                className="inline-block mb-8 rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+                className="inline-block mb-8 rounded-full bg-[var(--color-primary)] px-5 py-2 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)] transition-colors"
               >
                 {userPostedFun ? "Change your response" : "+ Post your response"}
               </Link>
             )}
             {funWithLikes.length === 0 ? (
-              <p className="py-12 text-center text-sm text-zinc-400">
+              <p className="py-12 text-center text-sm text-[var(--color-text-muted)]">
                 No responses yet — be the first!
               </p>
             ) : (

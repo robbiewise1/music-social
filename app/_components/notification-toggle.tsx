@@ -86,10 +86,10 @@ export function NotificationToggle() {
   if (status === "loading" || status === "unsupported") return null;
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3">
+    <div className="flex items-center justify-between rounded-xl border border-[var(--color-accent)]/18 px-4 py-3">
       <div>
-        <p className="text-sm font-medium text-zinc-900">Daily reminders</p>
-        <p className="text-xs text-zinc-400">
+        <p className="text-sm font-medium text-[var(--color-text)]">Daily reminders</p>
+        <p className="text-xs text-[var(--color-text-muted)]">
           {status === "denied"
             ? "Blocked — enable in browser settings"
             : status === "subscribed"
@@ -103,8 +103,8 @@ export function NotificationToggle() {
           disabled={working}
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
             status === "subscribed"
-              ? "border border-zinc-300 text-zinc-600 hover:border-zinc-400"
-              : "bg-zinc-900 text-white hover:bg-zinc-700"
+              ? "border border-[var(--color-accent)]/25 text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/40"
+              : "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]"
           }`}
         >
           {working ? "..." : status === "subscribed" ? "Turn off" : "Enable"}

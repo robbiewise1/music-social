@@ -53,20 +53,20 @@ export default async function ShabbosPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-zinc-900 mb-2">Shabbos Mode</h1>
-      <p className="text-sm text-zinc-400 mb-8">
+      <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">Shabbos Mode</h1>
+      <p className="text-sm text-[var(--color-text-muted)] mb-8">
         Pick a song on Friday and we&apos;ll post it to the Song of the Day
         feed at noon Eastern on Saturday — so your streak stays alive while
         you&apos;re offline.
       </p>
 
       {alreadyPublished ? (
-        <div className="rounded-xl border border-zinc-100 bg-white p-6 text-center space-y-2">
+        <div className="rounded-xl border border-[var(--color-accent)]/12 bg-[var(--color-surface)] p-6 text-center space-y-2">
           <p className="text-2xl">✓</p>
-          <p className="text-sm font-medium text-zinc-900">
+          <p className="text-sm font-medium text-[var(--color-text)]">
             Your Shabbos song was posted today at noon.
           </p>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-[var(--color-text-muted)]">
             You can find it in your profile and edit it there.
           </p>
         </div>

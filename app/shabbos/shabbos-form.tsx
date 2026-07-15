@@ -59,9 +59,9 @@ export function ShabbosForm({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3">
-        <p className="text-xs text-zinc-400 mb-0.5">Auto-posts on</p>
-        <p className="text-sm font-medium text-zinc-900">
+      <div className="rounded-lg bg-[var(--color-surface-tint)] border border-[var(--color-accent)]/18 px-4 py-3">
+        <p className="text-xs text-[var(--color-text-muted)] mb-0.5">Auto-posts on</p>
+        <p className="text-sm font-medium text-[var(--color-text)]">
           {formatDate(targetDate)} · noon Eastern
         </p>
       </div>
@@ -72,10 +72,10 @@ export function ShabbosForm({
         <div>
           <label
             htmlFor="caption"
-            className="block text-sm font-medium text-zinc-700 mb-1.5"
+            className="block text-sm font-medium text-[var(--color-text)] mb-1.5"
           >
             Caption{" "}
-            <span className="text-zinc-400 font-normal">(optional)</span>
+            <span className="text-[var(--color-text-muted)] font-normal">(optional)</span>
           </label>
           <textarea
             id="caption"
@@ -84,9 +84,9 @@ export function ShabbosForm({
             maxLength={280}
             rows={3}
             placeholder="Why this song?"
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+            className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
           />
-          <p className="mt-1 text-right text-xs text-zinc-400">
+          <p className="mt-1 text-right text-xs text-[var(--color-text-muted)]">
             {caption.length}/280
           </p>
         </div>
@@ -96,7 +96,7 @@ export function ShabbosForm({
         <button
           type="submit"
           disabled={!selectedSong || submitting}
-          className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {submitting
             ? "Saving…"
@@ -110,7 +110,7 @@ export function ShabbosForm({
         <button
           onClick={handleCancel}
           disabled={cancelling}
-          className="w-full rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full rounded-lg border border-[var(--color-accent)]/18 px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {cancelling ? "Cancelling…" : "Cancel scheduled post"}
         </button>

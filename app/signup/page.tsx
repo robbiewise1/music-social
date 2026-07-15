@@ -12,11 +12,11 @@ export default function SignupPage() {
       <main className="flex flex-1 items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm text-center">
           <div className="text-4xl mb-4">✉️</div>
-          <h1 className="text-xl font-bold text-zinc-900 mb-2">Check your email</h1>
-          <p className="text-sm text-zinc-500">{state.message}</p>
+          <h1 className="text-xl font-bold text-[var(--color-text)] mb-2">Check your email</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">{state.message}</p>
           <Link
             href="/login"
-            className="mt-6 inline-block text-sm font-medium text-zinc-900 hover:underline"
+            className="mt-6 inline-block text-sm font-medium text-[var(--color-text)] hover:underline"
           >
             Back to sign in
           </Link>
@@ -28,15 +28,15 @@ export default function SignupPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">Create account</h1>
-        <p className="text-sm text-zinc-400 mb-8">
-          On iPhone? After signing up, tap Share in Safari → <span className="text-zinc-500 font-medium">Add to Home Screen</span> to install the app.
+        <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">Create account</h1>
+        <p className="text-sm text-[var(--color-text-muted)] mb-8">
+          On iPhone? After signing up, tap Share in Safari → <span className="text-[var(--color-text-muted)] font-medium">Add to Home Screen</span> to install the app.
         </p>
         <form action={action} className="flex flex-col gap-4">
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-zinc-700 mb-1"
+              className="block text-sm font-medium text-[var(--color-text)] mb-1"
             >
               Email
             </label>
@@ -46,13 +46,13 @@ export default function SignupPage() {
               type="email"
               autoComplete="email"
               required
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-zinc-700 mb-1"
+              className="block text-sm font-medium text-[var(--color-text)] mb-1"
             >
               Password
             </label>
@@ -63,13 +63,13 @@ export default function SignupPage() {
               autoComplete="new-password"
               required
               minLength={6}
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-zinc-700 mb-1"
+              className="block text-sm font-medium text-[var(--color-text)] mb-1"
             >
               Username
             </label>
@@ -80,19 +80,19 @@ export default function SignupPage() {
               autoComplete="username"
               required
               placeholder="e.g. robbie_music"
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
-            <p className="mt-1 text-xs text-zinc-400">
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
               Letters, numbers, underscores. Min 3 chars.
             </p>
           </div>
           <div>
             <label
               htmlFor="display_name"
-              className="block text-sm font-medium text-zinc-700 mb-1"
+              className="block text-sm font-medium text-[var(--color-text)] mb-1"
             >
               Display name{" "}
-              <span className="text-zinc-400 font-normal">(optional)</span>
+              <span className="text-[var(--color-text-muted)] font-normal">(optional)</span>
             </label>
             <input
               id="display_name"
@@ -100,7 +100,7 @@ export default function SignupPage() {
               type="text"
               autoComplete="name"
               placeholder="Your name"
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           {state?.error && (
@@ -109,16 +109,16 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-full bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 transition-colors mt-2"
+            className="w-full rounded-full bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors mt-2"
           >
             {pending ? "Creating account…" : "Create account"}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-zinc-500">
+        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-zinc-900 hover:underline"
+            className="font-medium text-[var(--color-text)] hover:underline"
           >
             Sign in
           </Link>

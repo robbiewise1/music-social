@@ -113,18 +113,18 @@ function CommentRow({
 
   if (isDeleted) {
     return (
-      <div className={isReply ? "ml-4 border-l border-zinc-100 pl-3" : ""}>
-        <p className="text-xs italic text-zinc-400">
-          <span className="font-medium text-zinc-500">{authorName}</span> deleted this comment
+      <div className={isReply ? "ml-4 border-l border-[var(--color-accent)]/12 pl-3" : ""}>
+        <p className="text-xs italic text-[var(--color-text-muted)]">
+          <span className="font-medium text-[var(--color-text-muted)]">{authorName}</span> deleted this comment
         </p>
       </div>
     );
   }
 
   return (
-    <div className={isReply ? "ml-4 border-l border-zinc-100 pl-3" : ""}>
+    <div className={isReply ? "ml-4 border-l border-[var(--color-accent)]/12 pl-3" : ""}>
       {replyingToParent && (
-        <p className="text-[11px] text-zinc-400">
+        <p className="text-[11px] text-[var(--color-text-muted)]">
           Replying to @{replyingToParent.profiles?.username ?? replyingToParent.profiles?.display_name ?? "someone"}
         </p>
       )}
@@ -135,23 +135,23 @@ function CommentRow({
             autoFocus
             value={editText}
             onChange={(e) => onEditTextChange(e.target.value.slice(0, 150))}
-            className="flex-1 rounded-full border border-zinc-200 px-3 py-1.5 text-xs text-zinc-800 focus:border-zinc-400 focus:outline-none"
+            className="flex-1 rounded-full border border-[var(--color-accent)]/18 px-3 py-1.5 text-xs text-[var(--color-text)] focus:border-[var(--color-accent)]/35 focus:outline-none"
           />
           <button
             onClick={onSaveEdit}
             disabled={!editText.trim() || editSubmitting}
-            className="text-[11px] font-medium text-zinc-900 disabled:opacity-40 transition-opacity"
+            className="text-[11px] font-medium text-[var(--color-text)] disabled:opacity-40 transition-opacity"
           >
             {editSubmitting ? "…" : "Save"}
           </button>
-          <button onClick={onCancelEdit} className="text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors">
+          <button onClick={onCancelEdit} className="text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
             Cancel
           </button>
         </div>
       ) : (
-        <p className="text-xs text-zinc-600">
-          <span className="font-medium text-zinc-800">{authorName}</span> {comment.body}
-          {comment.edited_at && <span className="ml-1 text-zinc-300">(edited)</span>}
+        <p className="text-xs text-[var(--color-text-muted)]">
+          <span className="font-medium text-[var(--color-text)]">{authorName}</span> {comment.body}
+          {comment.edited_at && <span className="ml-1 text-[var(--color-text-muted)]">(edited)</span>}
         </p>
       )}
 
@@ -161,7 +161,7 @@ function CommentRow({
             onClick={() => onToggleLike(comment.id, comment.liked_by_me)}
             aria-label={comment.liked_by_me ? "Unlike" : "Like"}
             className={`flex items-center gap-1 transition-colors ${
-              comment.liked_by_me ? "text-rose-500 hover:text-rose-400" : "text-zinc-300 hover:text-rose-400"
+              comment.liked_by_me ? "text-rose-500 hover:text-rose-400" : "text-[var(--color-text-muted)] hover:text-rose-400"
             }`}
           >
             <HeartIcon filled={comment.liked_by_me} />
@@ -169,7 +169,7 @@ function CommentRow({
           </button>
           <button
             onClick={onOpenReplyForm}
-            className="text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
           >
             {replyFormOpen ? "Cancel" : "Reply"}
           </button>
@@ -177,13 +177,13 @@ function CommentRow({
             <>
               <button
                 onClick={onStartEdit}
-                className="text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors"
+                className="text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
               >
                 Edit
               </button>
               <button
                 onClick={onRequestDelete}
-                className="text-[11px] text-zinc-400 hover:text-rose-500 transition-colors"
+                className="text-[11px] text-[var(--color-text-muted)] hover:text-rose-500 transition-colors"
               >
                 Delete
               </button>
@@ -191,7 +191,7 @@ function CommentRow({
           )}
           {isConfirmingDelete && (
             <span className="flex items-center gap-2 text-[11px]">
-              <span className="text-zinc-400">Delete?</span>
+              <span className="text-[var(--color-text-muted)]">Delete?</span>
               <button
                 onClick={onConfirmDelete}
                 disabled={deleteSubmitting}
@@ -199,7 +199,7 @@ function CommentRow({
               >
                 {deleteSubmitting ? "…" : "Yes"}
               </button>
-              <button onClick={onCancelDelete} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+              <button onClick={onCancelDelete} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
                 Cancel
               </button>
             </span>
@@ -389,7 +389,7 @@ export function CommentThread({
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close comments" : "Comment"}
         className={`flex items-center gap-1.5 transition-colors ${
-          open ? "text-zinc-600" : "text-zinc-400 hover:text-zinc-600"
+          open ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
         }`}
       >
         <svg
@@ -405,7 +405,7 @@ export function CommentThread({
         >
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
-        {count > 0 && <span className="text-xs text-zinc-400">{count}</span>}
+        {count > 0 && <span className="text-xs text-[var(--color-text-muted)]">{count}</span>}
       </button>
 
       {open && (
@@ -416,16 +416,16 @@ export function CommentThread({
                 <p className="text-xs text-rose-500">Failed to load comments: {loadError}</p>
                 <button
                   onClick={loadComments}
-                  className="text-xs text-zinc-500 underline hover:text-zinc-700 transition-colors"
+                  className="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-primary)] transition-colors"
                 >
                   Retry
                 </button>
               </div>
             ) : (
-              <p className="text-xs text-zinc-400">Loading…</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Loading…</p>
             )
           ) : topLevel.length === 0 ? (
-            <p className="text-xs text-zinc-400">No comments yet.</p>
+            <p className="text-xs text-[var(--color-text-muted)]">No comments yet.</p>
           ) : (
             <div className="space-y-2">
               {visibleTopLevel.map((root) => {
@@ -484,7 +484,7 @@ export function CommentThread({
                             onClick={() =>
                               setVisibleReplies((prev) => new Map(prev).set(root.id, descendants.length))
                             }
-                            className="ml-4 text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors"
+                            className="ml-4 text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
                           >
                             Show {remainingReplies} more repl{remainingReplies === 1 ? "y" : "ies"}
                           </button>
@@ -497,7 +497,7 @@ export function CommentThread({
               {remainingTopLevel > 0 && (
                 <button
                   onClick={() => setVisibleTopLevelCount(topLevel.length)}
-                  className="text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors"
+                  className="text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
                 >
                   Show {remainingTopLevel} more comment{remainingTopLevel === 1 ? "" : "s"}
                 </button>
@@ -511,12 +511,12 @@ export function CommentThread({
               value={text}
               onChange={(e) => setText(e.target.value.slice(0, 150))}
               placeholder="Write a comment…"
-              className="flex-1 rounded-full border border-zinc-200 px-3 py-1.5 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+              className="flex-1 rounded-full border border-[var(--color-accent)]/18 px-3 py-1.5 text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent)]/35 focus:outline-none"
             />
             <button
               type="submit"
               disabled={!text.trim() || submitting}
-              className="rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40 transition-opacity"
+              className="rounded-full bg-[var(--color-primary)] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40 transition-opacity"
             >
               {submitting ? "…" : "Send"}
             </button>
@@ -551,12 +551,12 @@ function ReplyForm({
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, 150))}
         placeholder={placeholder}
-        className="flex-1 rounded-full border border-zinc-200 px-3 py-1.5 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+        className="flex-1 rounded-full border border-[var(--color-accent)]/18 px-3 py-1.5 text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent)]/35 focus:outline-none"
       />
       <button
         onClick={onSubmit}
         disabled={!value.trim() || submitting}
-        className="rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40 transition-opacity"
+        className="rounded-full bg-[var(--color-primary)] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40 transition-opacity"
       >
         {submitting ? "…" : "Send"}
       </button>

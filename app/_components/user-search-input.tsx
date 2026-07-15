@@ -25,7 +25,7 @@ export function UserSearchInput() {
       onChange={handleChange}
       placeholder="Search by username or name…"
       autoFocus
-      className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+      className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
     />
   );
 }

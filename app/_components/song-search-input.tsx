@@ -68,7 +68,7 @@ export function SongSearchInput({ onSelect, selectedSong }: Props) {
   return (
     <div ref={containerRef} className="relative">
       {selectedSong ? (
-        <div className="rounded-lg border border-zinc-200 p-1">
+        <div className="rounded-lg border border-[var(--color-accent)]/18 p-1">
           <SongCard song={selectedSong} selected />
           <button
             type="button"
@@ -76,7 +76,7 @@ export function SongSearchInput({ onSelect, selectedSong }: Props) {
               onSelect(null as unknown as SongResult);
               setQuery("");
             }}
-            className="mt-1 w-full rounded px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-600 transition-colors text-left"
+            className="mt-1 w-full rounded px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors text-left"
           >
             Change song
           </button>
@@ -88,15 +88,15 @@ export function SongSearchInput({ onSelect, selectedSong }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a song…"
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           />
           {loading && (
-            <p className="absolute right-3 top-2.5 text-xs text-zinc-400">
+            <p className="absolute right-3 top-2.5 text-xs text-[var(--color-text-muted)]">
               Searching…
             </p>
           )}
           {open && results.length > 0 && (
-            <div className="absolute z-20 mt-1 w-full rounded-lg border border-zinc-200 bg-white shadow-lg">
+            <div className="absolute z-20 mt-1 w-full rounded-lg border border-[var(--color-accent)]/18 bg-[var(--color-surface)] shadow-lg">
               {results.map((song) => (
                 <SongCard
                   key={song.track_id}
@@ -107,7 +107,7 @@ export function SongSearchInput({ onSelect, selectedSong }: Props) {
             </div>
           )}
           {open && !loading && results.length === 0 && query.trim() && (
-            <div className="absolute z-20 mt-1 w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-400 shadow-lg">
+            <div className="absolute z-20 mt-1 w-full rounded-lg border border-[var(--color-accent)]/18 bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text-muted)] shadow-lg">
               No results found.
             </div>
           )}

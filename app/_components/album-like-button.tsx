@@ -60,7 +60,7 @@ export function AlbumLikeButton({
           onClick={handleLike}
           aria-label={liked ? "Unlike" : "Like"}
           className={`flex items-center transition-colors ${
-            liked ? "text-rose-500 hover:text-rose-400" : "text-zinc-400 hover:text-rose-400"
+            liked ? "text-rose-500 hover:text-rose-400" : "text-[var(--color-text-muted)] hover:text-rose-400"
           }`}
         >
           <svg
@@ -80,14 +80,14 @@ export function AlbumLikeButton({
         {count > 0 && (
           <button
             onClick={() => initialLikers.length > 0 && setShowLikers((v) => !v)}
-            className="text-xs text-zinc-400 underline hover:text-zinc-600 transition-colors"
+            className="text-xs text-[var(--color-text-muted)] underline hover:text-[var(--color-primary)] transition-colors"
           >
             {count}
           </button>
         )}
       </div>
       {showLikers && initialLikers.length > 0 && (
-        <p className="text-xs text-zinc-500">{formatLikers(initialLikers)}</p>
+        <p className="text-xs text-[var(--color-text-muted)]">{formatLikers(initialLikers)}</p>
       )}
     </div>
   );

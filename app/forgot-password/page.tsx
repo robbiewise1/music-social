@@ -10,15 +10,15 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">
+        <h1 className="text-2xl font-bold text-[var(--color-text)] mb-2">
           Reset password
         </h1>
-        <p className="text-sm text-zinc-500 mb-8">
+        <p className="text-sm text-[var(--color-text-muted)] mb-8">
           Enter your email and we&apos;ll send you a reset link.
         </p>
 
         {state?.message ? (
-          <div className="rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-700">
+          <div className="rounded-lg bg-[var(--color-surface-tint)] border border-[var(--color-accent)]/18 px-4 py-3 text-sm text-[var(--color-text)]">
             {state.message}
           </div>
         ) : (
@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-zinc-700 mb-1"
+                className="block text-sm font-medium text-[var(--color-text)] mb-1"
               >
                 Email
               </label>
@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                className="w-full rounded-lg border border-[var(--color-accent)]/18 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               />
             </div>
             {state?.error && (
@@ -45,15 +45,15 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full rounded-full bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 transition-colors mt-2"
+              className="w-full rounded-full bg-[var(--color-primary)] py-2.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)] disabled:opacity-50 transition-colors mt-2"
             >
               {pending ? "Sending…" : "Send reset link"}
             </button>
           </form>
         )}
 
-        <p className="mt-6 text-center text-sm text-zinc-500">
-          <Link href="/login" className="font-medium text-zinc-900 hover:underline">
+        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+          <Link href="/login" className="font-medium text-[var(--color-text)] hover:underline">
             Back to sign in
           </Link>
         </p>
