@@ -1,9 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { PushPrompt } from "@/app/_components/push-prompt";
 import { InstallPrompt } from "@/app/_components/install-prompt";
+import { PromptCard } from "@/app/_components/prompt-card";
+import { SparkleIcon } from "@/app/_components/music-icons";
 
 function getThisWeekMonday(): string {
   const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
@@ -16,10 +18,7 @@ function getThisWeekMonday(): string {
 }
 
 export default async function FeedPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/login");
 
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
@@ -65,124 +64,101 @@ export default async function FeedPage() {
     <main className="w-full mx-auto max-w-2xl px-4 py-16">
       <InstallPrompt />
       <PushPrompt />
-      <div className="mb-6 rounded-2xl border border-violet-100 bg-violet-50 px-5 py-4">
-        <p className="text-sm font-semibold text-violet-900 mb-1">New: Put Ons 💡</p>
-        <p className="text-sm text-violet-700">
-          Love a song you didn&apos;t know before? Tap the <span className="font-medium">&ldquo;New to me&rdquo;</span> to give credit to the friend who put you on. The leaderboard now tracks who&apos;s putting people onto the most music — and who&apos;s discovering the most.
+
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-[var(--color-accent)]/30 bg-gradient-to-br from-[var(--color-primary)]/18 via-[var(--color-accent)]/20 to-[var(--color-secondary)]/18 px-5 py-4">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-white">
+            <SparkleIcon className="h-3.5 w-3.5" />
+          </span>
+          <div>
+            <p className="mb-1 flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)]">
+              Put Ons
+              <span className="rounded-full bg-[var(--color-secondary)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                New
+              </span>
+            </p>
+            <p className="max-w-md text-sm leading-relaxed text-[var(--color-text)]/80">
+              Love a song you didn&apos;t know before? Tap <span className="font-medium">&ldquo;New to me&rdquo;</span> to credit the friend who put you on. The leaderboard now tracks who&apos;s putting people onto the most music — and who&apos;s discovering the most.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mb-10 text-center">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-24 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-[var(--color-primary)]/40 via-[var(--color-accent)]/45 to-[var(--color-secondary)]/40 blur-xl"
+        />
+        <p className="mb-2 text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
+          {formatted}
+        </p>
+        <h1 className="mb-3 text-3xl font-bold tracking-tight text-[var(--color-text)]">
+          Today&apos;s prompts
+        </h1>
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-secondary)]/18 px-3 py-1 text-xs font-medium text-[var(--color-secondary-hover)]">
+          {currentStreak > 0
+            ? postedToday
+              ? `🔥 ${currentStreak} day streak`
+              : `🔥 ${currentStreak} day streak — post today to keep it alive!`
+            : "Post a song today to start your streak!"}
         </p>
       </div>
-      <p className="text-xs text-zinc-400 mb-2 text-center uppercase tracking-widest">
-        {formatted}
-      </p>
-      <h1 className="text-3xl font-bold text-zinc-900 mb-1 text-center">
-        Today&apos;s prompts
-      </h1>
-      <p className="text-xs text-zinc-400 text-center mb-10">
-        {currentStreak > 0
-          ? postedToday
-            ? `🔥 ${currentStreak} day streak`
-            : `🔥 ${currentStreak} day streak — post today to keep it alive!`
-          : "Post a song today to start your streak!"}
-      </p>
 
       {isFriday && (
         <Link
           href="/shabbos"
-          className="group flex items-center justify-between rounded-2xl border border-zinc-200 bg-white px-6 py-4 mb-4 hover:border-zinc-400 hover:shadow-md transition-all"
+          className="group mb-4 flex items-center justify-between rounded-2xl border border-[var(--color-accent)]/20 bg-[var(--color-surface)] px-6 py-4 shadow-[var(--shadow-soft)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 hover:shadow-[var(--shadow-soft-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
         >
           <div>
-            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-0.5">
+            <p className="mb-0.5 text-xs font-medium uppercase tracking-widest text-[var(--color-text-muted)]">
               Shabbos Mode
             </p>
-            <p className="text-sm font-semibold text-zinc-900">
+            <p className="text-sm font-semibold text-[var(--color-text)]">
               Schedule a song for tomorrow so your streak stays alive
             </p>
           </div>
-          <span className="ml-4 text-zinc-300 group-hover:text-zinc-600 transition-colors text-lg shrink-0">
+          <span className="ml-4 shrink-0 text-lg text-[var(--color-text-muted)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]">
             →
           </span>
         </Link>
       )}
 
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <Link
+        <PromptCard
           href="/prompt/song-of-the-day"
-          className="group flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 hover:border-zinc-400 hover:shadow-md transition-all min-h-48"
-        >
-          <div>
-            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-2">
-              Song of the Day
-            </p>
-            <p className="text-lg font-semibold text-zinc-900 leading-snug">
-              What are you listening to today?
-            </p>
-          </div>
-          <div className="mt-6 flex items-center justify-between">
-            <p className="text-sm text-zinc-400">
-              {sotdCount === 0
-                ? "No songs yet"
-                : `${sotdCount} song${sotdCount === 1 ? "" : "s"} shared`}
-            </p>
-            <span className="text-zinc-300 group-hover:text-zinc-600 transition-colors text-lg">
-              →
-            </span>
-          </div>
-        </Link>
+          category="song"
+          label="Song of the Day"
+          title="What are you listening to today?"
+          count={sotdCount}
+          itemNoun="song"
+          cta="View songs →"
+          className="min-h-48"
+        />
 
-        <Link
+        <PromptCard
           href="/prompt/daily-fun"
-          className="group flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 hover:border-zinc-400 hover:shadow-md transition-all min-h-48"
-        >
-          <div>
-            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-2">
-              Prompt of the Day
-            </p>
-            <p className="text-lg font-semibold text-zinc-900 leading-snug">
-              {funPrompt?.title ?? "Today's prompt"}
-            </p>
-            {funPrompt?.description && (
-              <p className="mt-1 text-sm text-zinc-500">{funPrompt.description}</p>
-            )}
-          </div>
-          <div className="mt-6 flex items-center justify-between">
-            <p className="text-sm text-zinc-400">
-              {funCount === 0
-                ? "No songs yet"
-                : `${funCount} song${funCount === 1 ? "" : "s"} shared`}
-            </p>
-            <span className="text-zinc-300 group-hover:text-zinc-600 transition-colors text-lg">
-              →
-            </span>
-          </div>
-        </Link>
+          category="fun"
+          label="Prompt of the Day"
+          title={funPrompt?.title ?? "Today's prompt"}
+          description={funPrompt?.description}
+          count={funCount}
+          itemNoun="song"
+          cta="View songs →"
+          className="min-h-48"
+        />
       </div>
 
-      <Link
+      <PromptCard
         href="/prompt/album-of-the-week"
-        className="group flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 hover:border-zinc-400 hover:shadow-md transition-all w-full"
-      >
-        <div>
-          <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-2">
-            Album of the Week
-          </p>
-          <p className="text-lg font-semibold text-zinc-900 leading-snug">
-            {albumPrompt?.title ?? "What album are you loving this week?"}
-          </p>
-          {albumPrompt?.description && (
-            <p className="mt-1 text-sm text-zinc-500">{albumPrompt.description}</p>
-          )}
-        </div>
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-sm text-zinc-400">
-            {albumCount === 0
-              ? "No albums yet"
-              : `${albumCount} album${albumCount === 1 ? "" : "s"} shared`}
-          </p>
-          <span className="text-zinc-300 group-hover:text-zinc-600 transition-colors text-lg">
-            →
-          </span>
-        </div>
-      </Link>
+        category="album"
+        label="Album of the Week"
+        title={albumPrompt?.title ?? "What album are you loving this week?"}
+        description={albumPrompt?.description}
+        count={albumCount}
+        itemNoun="album"
+        cta="Open prompt →"
+        className="w-full"
+      />
     </main>
   );
 }

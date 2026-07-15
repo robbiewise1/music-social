@@ -43,7 +43,7 @@ export function MobileNavLinks() {
   const pathname = usePathname();
 
   return (
-    <nav className="sm:hidden fixed bottom-0 inset-x-0 border-t border-zinc-100 bg-white z-20">
+    <nav className="sm:hidden fixed bottom-0 inset-x-0 z-20 border-t border-[var(--color-accent)]/20 bg-[var(--color-surface)]/95 backdrop-blur-sm">
       <div className="flex items-center justify-around px-4 py-2 pb-4">
         {NAV_ITEMS.map(({ href, label, icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
@@ -51,8 +51,10 @@ export function MobileNavLinks() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-1 px-4 py-2 transition-colors ${
-                active ? "text-zinc-900" : "text-zinc-400 hover:text-zinc-900"
+              className={`flex flex-col items-center gap-1 rounded-md px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] ${
+                active
+                  ? "text-[var(--color-primary)]"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
               }`}
             >
               {icon}

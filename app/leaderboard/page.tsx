@@ -1,15 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { LeaderboardTabs } from "./leaderboard-tabs";
 
 export default async function LeaderboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/login");
 
+  const supabase = await createClient();
   const admin = createAdminClient();
 
   const easternFormatter = new Intl.DateTimeFormat("en-CA", {

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { type AlbumFeedPost } from "@/app/_components/album-feed-item";
@@ -103,8 +103,7 @@ async function fetchWeekSection(
 export default async function AlbumOfTheWeekPage() {
   const { thisWeek, lastWeek } = getWeekStrings();
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   const [thisWeekData, lastWeekData] = await Promise.all([
     fetchWeekSection(thisWeek, user?.id),

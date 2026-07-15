@@ -1,14 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { SongResult } from "@/app/api/spotify/search/route";
 import { nextSaturday } from "@/lib/dates";
 import { ShabbosForm } from "./shabbos-form";
 
 export default async function ShabbosPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/login");
 
   const today = new Date().toLocaleDateString("en-CA", {
@@ -23,6 +20,7 @@ export default async function ShabbosPage() {
   // so without this the confirmation block would never render on the day it matters.
   const datesToQuery = isSaturday ? [today, upcomingSaturday] : [upcomingSaturday];
 
+  const supabase = await createClient();
   const { data: rows } = await supabase
     .from("scheduled_posts")
     .select(

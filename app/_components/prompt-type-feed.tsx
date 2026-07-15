@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { type FeedPost } from "@/app/_components/feed-item";
@@ -163,8 +163,7 @@ async function fetchDaySection(
 export async function PromptTypeFeed({ promptType }: { promptType: PromptType }) {
   const { today, yesterday } = getDateStrings();
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   const [todayData, yesterdayData] = await Promise.all([
     fetchDaySection(today, promptType, user?.id),

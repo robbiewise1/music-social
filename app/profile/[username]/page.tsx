@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { FeedItem, type FeedPost } from "@/app/_components/feed-item";
@@ -20,10 +20,7 @@ export default async function ProfilePage({
 
   if (!profile) notFound();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   const { data: rawPosts } = await admin
     .from("posts")
