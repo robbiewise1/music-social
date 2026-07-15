@@ -51,23 +51,24 @@ export function FeedItem({ post }: { post: FeedPost }) {
 
   return (
     <article className="rounded-xl border border-[var(--color-accent)]/12 bg-[var(--color-surface)] p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-start justify-between mb-3 gap-2">
         <Link
           href={`/profile/${profile?.username}`}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex flex-1 min-w-0 flex-wrap items-center gap-x-2 gap-y-1 hover:opacity-80 transition-opacity"
         >
           <div className="h-7 w-7 rounded-full bg-[var(--color-accent)]/20 shrink-0" />
-          <span className="text-sm font-medium text-[var(--color-text)]">
+          <span className="text-sm font-medium text-[var(--color-text)] truncate">
             {profile?.display_name ?? profile?.username ?? "Unknown"}
           </span>
+          <span className="text-xs text-[var(--color-text-muted)] truncate">@{profile?.username}</span>
           {GenreIcon && profile?.top_genre && (
-            <span title={GENRE_CATEGORY_LABELS[profile.top_genre]}>
-              <GenreIcon className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)] shrink-0">
+              <GenreIcon className="h-3 w-3 shrink-0" />
+              {GENRE_CATEGORY_LABELS[profile.top_genre]}
             </span>
           )}
-          <span className="text-xs text-[var(--color-text-muted)]">@{profile?.username}</span>
         </Link>
-        <span className="text-xs text-[var(--color-text-muted)]">{formatDate(post.created_at)}</span>
+        <span className="text-xs text-[var(--color-text-muted)] shrink-0">{formatDate(post.created_at)}</span>
       </div>
 
       {post.prompt && (
