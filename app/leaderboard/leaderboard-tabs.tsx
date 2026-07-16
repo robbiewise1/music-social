@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { GENRE_ICONS } from "@/app/_components/music-icons";
+import { GENRE_CATEGORY_LABELS, type GenreCategory } from "@/lib/genre-map";
 
 type Entry = {
   userId: string;
@@ -9,6 +11,7 @@ type Entry = {
   displayName: string;
   currentStreak: number;
   longestStreak: number;
+  topGenre: GenreCategory | null;
 };
 
 type PutOnEntry = {
@@ -16,9 +19,21 @@ type PutOnEntry = {
   username: string;
   displayName: string;
   count: number;
+  topGenre: GenreCategory | null;
 };
 
 const MEDALS = ["🥇", "🥈", "🥉"];
+
+function GenreBadge({ topGenre }: { topGenre: GenreCategory | null }) {
+  if (!topGenre) return null;
+  const Icon = GENRE_ICONS[topGenre];
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)] shrink-0">
+      <Icon className="h-3 w-3 shrink-0" />
+      {GENRE_CATEGORY_LABELS[topGenre]}
+    </span>
+  );
+}
 
 function RankedList({
   entries,
@@ -59,11 +74,12 @@ function RankedList({
             <div className="h-9 w-9 rounded-full bg-[var(--color-accent)]/20 shrink-0" />
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[var(--color-text)] truncate">
-                {entry.displayName}
+              <p className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)] truncate">
+                <span className="truncate">{entry.displayName}</span>
                 {isMe && (
-                  <span className="ml-2 text-xs font-normal text-[var(--color-text-muted)]">you</span>
+                  <span className="text-xs font-normal text-[var(--color-text-muted)]">you</span>
                 )}
+                <GenreBadge topGenre={entry.topGenre} />
               </p>
               <p className="text-xs text-[var(--color-text-muted)]">@{entry.username}</p>
             </div>
@@ -193,13 +209,14 @@ export function LeaderboardTabs({
                 <div className="h-9 w-9 rounded-full bg-[var(--color-accent)]/20 shrink-0" />
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--color-text)] truncate">
-                    {entry.displayName}
+                  <p className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)] truncate">
+                    <span className="truncate">{entry.displayName}</span>
                     {isMe && (
-                      <span className="ml-2 text-xs font-normal text-[var(--color-text-muted)]">
+                      <span className="text-xs font-normal text-[var(--color-text-muted)]">
                         you
                       </span>
                     )}
+                    <GenreBadge topGenre={entry.topGenre} />
                   </p>
                   <p className="text-xs text-[var(--color-text-muted)]">@{entry.username}</p>
                 </div>

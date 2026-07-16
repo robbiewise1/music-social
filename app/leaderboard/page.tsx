@@ -2,6 +2,7 @@ import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { LeaderboardTabs } from "./leaderboard-tabs";
+import type { GenreCategory } from "@/lib/genre-map";
 
 export default async function LeaderboardPage() {
   const user = await getAuthUser();
@@ -56,7 +57,7 @@ export default async function LeaderboardPage() {
   const { data: streakProfiles } = streakUserIds.length
     ? await supabase
         .from("profiles")
-        .select("id, username, display_name")
+        .select("id, username, display_name, top_genre")
         .in("id", streakUserIds)
     : { data: [] };
 
@@ -72,6 +73,7 @@ export default async function LeaderboardPage() {
       displayName: (profile?.display_name ?? "") as string,
       currentStreak: row.current_streak as number,
       longestStreak: row.longest_streak as number,
+      topGenre: (profile?.top_genre ?? null) as GenreCategory | null,
     };
   });
 
@@ -101,7 +103,7 @@ export default async function LeaderboardPage() {
   // Fetch profiles for all put-on participants
   const putOnUserIds = [...new Set([...receivedMap.keys(), ...discoveredMap.keys()])];
   const { data: putOnProfiles } = putOnUserIds.length
-    ? await admin.from("profiles").select("id, username, display_name").in("id", putOnUserIds)
+    ? await admin.from("profiles").select("id, username, display_name, top_genre").in("id", putOnUserIds)
     : { data: [] };
 
   const putOnProfileMap = new Map((putOnProfiles ?? []).map((p) => [p.id as string, p]));
@@ -115,6 +117,7 @@ export default async function LeaderboardPage() {
           username: (profile?.username ?? "") as string,
           displayName: (profile?.display_name ?? "") as string,
           count,
+          topGenre: (profile?.top_genre ?? null) as GenreCategory | null,
         };
       })
       .sort((a, b) => b.count - a.count);

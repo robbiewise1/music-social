@@ -7,8 +7,8 @@ import { SortableFeedList } from "@/app/_components/sortable-feed-list";
 import { fetchCommentCounts } from "@/lib/comment-counts.server";
 
 const POST_SELECT = `id, caption, created_at, user_id,
-  profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url, top_genre ),
-  songs ( title, artist, album, album_art_url, spotify_url )`;
+  profiles:profiles!posts_user_id_fkey ( username, display_name, avatar_url ),
+  songs ( title, artist, album, album_art_url, spotify_url, genre )`;
 
 type PostWithUser = FeedPost & { user_id: string };
 

@@ -3,7 +3,7 @@ import { LikeButton } from "./like-button";
 import { CommentThread } from "./comment-thread";
 import { PutMeOnButton } from "./put-me-on-button";
 import { GENRE_ICONS } from "./music-icons";
-import { GENRE_CATEGORY_LABELS, type GenreCategory } from "@/lib/genre-map";
+import { GENRE_CATEGORY_LABELS, mapGenreToCategory } from "@/lib/genre-map";
 
 export type FeedPost = {
   id: string;
@@ -13,7 +13,6 @@ export type FeedPost = {
     username: string;
     display_name: string;
     avatar_url: string | null;
-    top_genre?: GenreCategory | null;
   } | null;
   songs: {
     title: string;
@@ -21,6 +20,7 @@ export type FeedPost = {
     album: string;
     album_art_url: string | null;
     spotify_url: string;
+    genre?: string | null;
   } | null;
   prompt?: {
     title: string;
@@ -47,7 +47,8 @@ function formatDate(dateStr: string): string {
 
 export function FeedItem({ post }: { post: FeedPost }) {
   const { profiles: profile, songs: song } = post;
-  const GenreIcon = profile?.top_genre ? GENRE_ICONS[profile.top_genre] : null;
+  const songGenre = song?.genre ? mapGenreToCategory(song.genre) : null;
+  const GenreIcon = songGenre ? GENRE_ICONS[songGenre] : null;
 
   return (
     <article className="rounded-xl border border-[var(--color-accent)]/12 bg-[var(--color-surface)] p-4 shadow-sm">
@@ -61,12 +62,6 @@ export function FeedItem({ post }: { post: FeedPost }) {
             {profile?.display_name ?? profile?.username ?? "Unknown"}
           </span>
           <span className="text-xs text-[var(--color-text-muted)] truncate">@{profile?.username}</span>
-          {GenreIcon && profile?.top_genre && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)] shrink-0">
-              <GenreIcon className="h-3 w-3 shrink-0" />
-              {GENRE_CATEGORY_LABELS[profile.top_genre]}
-            </span>
-          )}
         </Link>
         <span className="text-xs text-[var(--color-text-muted)] shrink-0">{formatDate(post.created_at)}</span>
       </div>
@@ -106,6 +101,12 @@ export function FeedItem({ post }: { post: FeedPost }) {
             </p>
             <p className="truncate text-sm text-[var(--color-text-muted)]">{song.artist}</p>
             <p className="truncate text-xs text-[var(--color-text-muted)]">{song.album}</p>
+            {GenreIcon && songGenre && (
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)]">
+                <GenreIcon className="h-3 w-3 shrink-0" />
+                {GENRE_CATEGORY_LABELS[songGenre]}
+              </span>
+            )}
           </div>
           <svg
             xmlns="http://www.w3.org/2000/svg"
