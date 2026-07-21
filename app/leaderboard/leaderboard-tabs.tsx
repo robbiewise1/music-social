@@ -110,11 +110,13 @@ export function LeaderboardTabs({
 }) {
   const [view, setView] = useState<"current" | "longest" | "putons">("current");
 
-  const sorted = [...entries].sort((a, b) =>
-    view === "current"
-      ? b.currentStreak - a.currentStreak || b.longestStreak - a.longestStreak
-      : b.longestStreak - a.longestStreak || b.currentStreak - a.currentStreak
-  );
+  const sorted = [...entries]
+    .filter((e) => (view === "current" ? e.currentStreak : e.longestStreak) >= 1)
+    .sort((a, b) =>
+      view === "current"
+        ? b.currentStreak - a.currentStreak || b.longestStreak - a.longestStreak
+        : b.longestStreak - a.longestStreak || b.currentStreak - a.currentStreak
+    );
 
   // Show top 5, but include everyone tied at 5th place.
   const cutoff = sorted[4] ? (view === "current" ? sorted[4].currentStreak : sorted[4].longestStreak) : 0;
